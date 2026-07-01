@@ -254,7 +254,7 @@
             }
         }
 
-        // --- ENGINE DI GIOCO RE-INGEGNERIZZATO ---
+        // --- ENGINE DI GIOCO ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -394,7 +394,7 @@
             };
         }
 
-        // --- UPDATE GIOCO CON COLLISIONE CONTINUA (ANTI-TUNNELING) ---
+        // --- UPDATE GIOCO CON COLLISIONE A "CROCE" (FIX TUNNELING) ---
         function updateGame() {
             if (isGameWon) return;
             pulseTime += 0.15;
@@ -425,33 +425,34 @@
                     }
                 }
 
-                // Movimento Sfere (Anti-Tunneling)
+                // Movimento Sfere
                 for(let s of spheres) {
                     let r = s.radius;
                     let hitTrail = false;
+                    let tolerance = 0.4; // Sensori laterali "smussati"
 
                     // Asse X
                     let oldX = s.x;
                     s.x += s.vx;
                     let hitX = false;
                     
-                    let minX = Math.floor(s.x - r);
-                    let maxX = Math.floor(s.x + r);
-                    let minY = Math.floor(s.y - r * 0.7); 
-                    let maxY = Math.floor(s.y + r * 0.7);
+                    let minY = Math.floor(s.y - r * tolerance); 
+                    let maxY = Math.floor(s.y + r * tolerance);
 
-                    if (minX < 0 || maxX >= WIDTH) {
+                    let checkColStart = Math.floor(oldX + (s.vx > 0 ? r : -r));
+                    let checkColEnd = Math.floor(s.x + (s.vx > 0 ? r : -r));
+                    let c1 = Math.min(checkColStart, checkColEnd);
+                    let c2 = Math.max(checkColStart, checkColEnd);
+
+                    if (c1 < 0 || c2 >= WIDTH) {
                         hitX = true;
                     } else {
-                        let checkColStart = Math.floor(oldX + (s.vx > 0 ? r : -r));
-                        let checkColEnd = Math.floor(s.x + (s.vx > 0 ? r : -r));
-                        let c1 = Math.min(checkColStart, checkColEnd);
-                        let c2 = Math.max(checkColStart, checkColEnd);
-
                         for (let y = minY; y <= maxY; y++) {
                             for (let x = c1; x <= c2; x++) {
-                                if (grid[y][x] === 1) hitX = true;
-                                if (grid[y][x] === 2) hitTrail = true;
+                                if (y >= 0 && y < HEIGHT && x >= 0 && x < WIDTH) {
+                                    if (grid[y][x] === 1) hitX = true;
+                                    if (grid[y][x] === 2) hitTrail = true;
+                                }
                             }
                         }
                     }
@@ -467,23 +468,23 @@
                     s.y += s.vy;
                     let hitY = false;
 
-                    minX = Math.floor(s.x - r * 0.7);
-                    maxX = Math.floor(s.x + r * 0.7);
-                    minY = Math.floor(s.y - r);
-                    maxY = Math.floor(s.y + r);
+                    let minX = Math.floor(s.x - r * tolerance);
+                    let maxX = Math.floor(s.x + r * tolerance);
 
-                    if (minY < 0 || maxY >= HEIGHT) {
+                    let checkRowStart = Math.floor(oldY + (s.vy > 0 ? r : -r));
+                    let checkRowEnd = Math.floor(s.y + (s.vy > 0 ? r : -r));
+                    let r1 = Math.min(checkRowStart, checkRowEnd);
+                    let r2 = Math.max(checkRowStart, checkRowEnd);
+
+                    if (r1 < 0 || r2 >= HEIGHT) {
                         hitY = true;
                     } else {
-                        let checkRowStart = Math.floor(oldY + (s.vy > 0 ? r : -r));
-                        let checkRowEnd = Math.floor(s.y + (s.vy > 0 ? r : -r));
-                        let r1 = Math.min(checkRowStart, checkRowEnd);
-                        let r2 = Math.max(checkRowStart, checkRowEnd);
-
                         for (let x = minX; x <= maxX; x++) {
                             for (let y = r1; y <= r2; y++) {
-                                if (grid[y][x] === 1) hitY = true;
-                                if (grid[y][x] === 2) hitTrail = true;
+                                if (y >= 0 && y < HEIGHT && x >= 0 && x < WIDTH) {
+                                    if (grid[y][x] === 1) hitY = true;
+                                    if (grid[y][x] === 2) hitTrail = true;
+                                }
                             }
                         }
                     }
@@ -498,7 +499,7 @@
             draw();
         }
 
-        // --- NUOVA LOGICA ARCADE: FLOOD FILL ANCORATO AL GIOCATORE ---
+        // --- LOGICA ARCADE: FLOOD FILL ANCORATO AL GIOCATORE ---
         function finalizeConquest() {
             for(let y=0; y<HEIGHT; y++){
                 for(let x=0; x<WIDTH; x++){ 
@@ -663,13 +664,11 @@
                 ctx.closePath();
             }
 
-            // --- DISEGNO CURSORE CON GLOW NEON AUMENTATO ---
             ctx.save();
             let pulseRadius = 4 + Math.abs(Math.sin(pulseTime)) * 5; 
             
             ctx.beginPath();
             ctx.arc(player.x, player.y, pulseRadius, 0, Math.PI * 2);
-            // Sostituito var(--cyan) con Hex puro per risolvere il bug grafico su Canvas
             ctx.shadowBlur = 20;
             ctx.shadowColor = '#00f0ff';
             ctx.strokeStyle = '#00f0ff'; 
