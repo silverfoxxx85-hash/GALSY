@@ -69,14 +69,12 @@
         }
         .btn-close-win:active { transform: scale(0.85); }
 
-        /* Overlay di Stato & Tutorial */
         .game-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
         .game-overlay.active { display: flex; }
         .overlay-title { font-size: 28px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; }
         .overlay-title.lose { color: var(--red); }
         .btn-retry { background: #000; color: white; border: none; padding: 14px 28px; font-weight: 700; font-size: 14px; border-radius: 8px; cursor: pointer; text-transform: uppercase; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         
-        /* Stile specifico per il Tutorial */
         .tutorial-list { color: #fff; text-align: left; margin: 20px 0; font-size: 15px; line-height: 1.6; list-style: none; padding: 0; text-shadow: 0 1px 3px #000; }
         .tutorial-list li { margin-bottom: 12px; }
     </style>
@@ -166,7 +164,6 @@
     </div>
 
     <script>
-        // LA TUA CHIAVE API IMGBB INSERITA
         const IMGBB_API_KEY = "abb3d6c7fa712bb5a39ef3dcd4134695";
         
         let challenge = { imgBase64: "", diff: 3, tries: Infinity, auto: false };
@@ -257,7 +254,7 @@
             }
         }
 
-        // --- ENGINE DI GIOCO AD ALTA RISOLUZIONE ---
+        // --- ENGINE DI GIOCO RE-INGEGNERIZZATO ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -269,12 +266,9 @@
         let isDrawing = false, gameInterval = null, targetPercentage = 80;
         let currentDir = null, isGameWon = false;
         let pulseTime = 0;
-        
-        let isPlaying = false; // Stato del gioco per il tutorial
+        let isPlaying = false; 
 
-        let playerSpeedCounter = 0;
         const playerSpeedStep = 3; 
-
         let renderBox = { x: 0, y: 0, w: 0, h: 0 };
 
         let colorPixels = null;
@@ -292,7 +286,7 @@
                 currentAttempts = challenge.tries;
                 
                 loadedImage.onload = function() { initGame(); };
-                loadedImage.onerror = function() { alert("Errore nel caricamento dell'immagine. Il link potrebbe essere scaduto."); };
+                loadedImage.onerror = function() { alert("Errore nel caricamento dell'immagine."); };
                 loadedImage.src = decodeURIComponent(params.get('img'));
             } else {
                 document.getElementById('screenRegia').classList.add('active');
@@ -303,15 +297,13 @@
             const targets = [0, 60, 70, 80, 85, 90];
             targetPercentage = targets[challenge.diff];
             currentDir = null; isDrawing = false; isGameWon = false;
-            isPlaying = false; // Inizialmente in pausa
+            isPlaying = false; 
 
             document.getElementById('gameHud').style.display = 'flex';
             document.getElementById('btnCloseWin').style.display = 'none';
             document.getElementById('hudProgress').innerText = `AREA: 0% / ${targetPercentage}%`;
             document.getElementById('hudAttempts').innerText = `VITE: ${challenge.tries === Infinity ? '∞' : currentAttempts}`;
             document.getElementById('gameOverlay').classList.remove('active');
-            
-            // Mostra Tutorial
             document.getElementById('tutorialOverlay').style.display = 'flex';
 
             let imgRatio = loadedImage.width / loadedImage.height;
@@ -334,7 +326,6 @@
                     }
                 }
             }
-            // Posiziona il giocatore sul bordo visibile per renderlo palese
             player.x = renderBox.x; player.y = renderBox.y + Math.floor(renderBox.h / 2);
 
             let pixelChunks = 40; 
@@ -382,7 +373,7 @@
         function startGameplay() {
             document.getElementById('tutorialOverlay').style.display = 'none';
             isPlaying = true;
-            currentDir = null; // Evita movimenti accidentali accumulati
+            currentDir = null;
         }
 
         function setupSwipeControls() {
@@ -405,9 +396,8 @@
 
         function updateGame() {
             if (isGameWon) return;
-            pulseTime += 0.15; // L'animazione continua anche in pausa
+            pulseTime += 0.15;
 
-            // Logica bloccata se c'è il tutorial
             if (isPlaying) {
                 if(currentDir) {
                     for(let step=0; step < playerSpeedStep; step++) {
@@ -456,51 +446,80 @@
             draw();
         }
 
+        // --- NUOVA LOGICA ARCADE: FLOOD FILL ANCORATO AL GIOCATORE ---
         function finalizeConquest() {
+            // 1. Congela la linea temporanea trasformandola in area stabile
             for(let y=0; y<HEIGHT; y++){
-                for(let x=0; x<WIDTH; x++){
-                    if(grid[y][x] === 2) grid[y][x] = 1;
-                }
+                for(let x=0; x<WIDTH; x++){ if(grid[y][x] === 2) grid[y][x] = 1; }
             }
 
-            let visited = new Uint8Array(WIDTH * HEIGHT);
-            let regions = [];
+            // 2. Crea una mappa di riempimento temporanea
+            let fillMap = Array(HEIGHT).fill().map(() => new Uint8Array(WIDTH));
+            
+            // 3. Esegui il Flood Fill partendo unicamente dalla posizione del GIOCATORE
+            let queue = [{x: player.x, y: player.y}];
+            fillMap[player.y][player.x] = 1;
+            let head = 0;
 
-            for (let y = 0; y < HEIGHT; y++) {
-                for (let x = 0; x < WIDTH; x++) {
-                    let startIdx = y * WIDTH + x;
-                    
-                    if (grid[y][x] === 0 && visited[startIdx] === 0) {
-                        let cells = [];
-                        let queue = [startIdx];
-                        visited[startIdx] = 1;
-                        let hasSphere = false;
-                        let head = 0;
+            while(head < queue.length) {
+                let curr = queue[head++];
+                
+                let neighbors = [
+                    {x: curr.x, y: curr.y-1}, {x: curr.x, y: curr.y+1},
+                    {x: curr.x-1, y: curr.y}, {x: curr.x+1, y: curr.y}
+                ];
 
-                        while (head < queue.length) {
-                            let currIdx = queue[head++];
-                            cells.push(currIdx);
-                            let cy = Math.floor(currIdx / WIDTH);
-                            let cx = currIdx % WIDTH;
-
-                            for(let s of spheres) {
-                                if(Math.abs(s.x - cx) < s.radius + 2 && Math.abs(s.y - cy) < s.radius + 2) hasSphere = true;
-                            }
-
-                            if (cy > 0 && grid[cy-1][cx] === 0 && visited[currIdx - WIDTH] === 0) { visited[currIdx - WIDTH] = 1; queue.push(currIdx - WIDTH); }
-                            if (cy < HEIGHT-1 && grid[cy+1][cx] === 0 && visited[currIdx + WIDTH] === 0) { visited[currIdx + WIDTH] = 1; queue.push(currIdx + WIDTH); }
-                            if (cx > 0 && grid[cy][cx-1] === 0 && visited[currIdx - 1] === 0) { visited[currIdx - 1] = 1; queue.push(currIdx - 1); }
-                            if (cx < WIDTH-1 && grid[cy][cx+1] === 0 && visited[currIdx + 1] === 0) { visited[currIdx + 1] = 1; queue.push(currIdx + 1); }
+                for(let n of neighbors) {
+                    if(n.x >= 0 && n.x < WIDTH && n.y >= 0 && n.y < HEIGHT) {
+                        // Se la cella non è ancora stata visitata ed è un'area scoperta/percorso sicuro
+                        if(fillMap[n.y][n.x] === 0 && grid[n.y][n.x] === 1) {
+                            fillMap[n.y][n.x] = 1;
+                            queue.push(n);
                         }
-                        regions.push({ cells, hasSphere });
                     }
                 }
             }
 
-            for (let reg of regions) {
-                if (!reg.hasSphere) {
-                    for (let idx of reg.cells) {
-                        grid[Math.floor(idx / WIDTH)][idx % WIDTH] = 1;
+            // 4. Determina se l'area scura (0) contiene sfere ostacolo
+            let visitedDark = new Uint8Array(WIDTH * HEIGHT);
+            
+            for (let y = 0; y < HEIGHT; y++) {
+                for (let x = 0; x < WIDTH; x++) {
+                    let idx = y * WIDTH + x;
+                    if (grid[y][x] === 0 && visitedDark[idx] === 0) {
+                        
+                        let darkCells = [];
+                        let darkQueue = [idx];
+                        visitedDark[idx] = 1;
+                        let hasSphere = false;
+                        let dHead = 0;
+
+                        while (dHead < darkQueue.length) {
+                            let currIdx = darkQueue[dHead++];
+                            darkCells.push(currIdx);
+                            let cy = Math.floor(currIdx / WIDTH);
+                            let cx = currIdx % WIDTH;
+
+                            // Rilevamento collisione con il raggio d'azione delle sfere
+                            for(let s of spheres) {
+                                if(Math.abs(s.x - cx) < s.radius + 2 && Math.abs(s.y - cy) < s.radius + 2) {
+                                    hasSphere = true;
+                                }
+                            }
+
+                            // Controlla adiacenze della nebbia
+                            if (cy > 0 && grid[cy-1][cx] === 0 && visitedDark[currIdx - WIDTH] === 0) { visitedDark[currIdx - WIDTH] = 1; darkQueue.push(currIdx - WIDTH); }
+                            if (cy < HEIGHT-1 && grid[cy+1][cx] === 0 && visitedDark[currIdx + WIDTH] === 0) { visitedDark[currIdx + WIDTH] = 1; darkQueue.push(currIdx + WIDTH); }
+                            if (cx > 0 && grid[cy][cx-1] === 0 && visitedDark[currIdx - 1] === 0) { visitedDark[currIdx - 1] = 1; darkQueue.push(currIdx - 1); }
+                            if (cx < WIDTH-1 && grid[cy][cx+1] === 0 && visitedDark[currIdx + 1] === 0) { visitedDark[currIdx + 1] = 1; darkQueue.push(currIdx + 1); }
+                        }
+
+                        // Se l'area scura isolata NON ha mostri all'interno, viene conquistata ed esposta!
+                        if (!hasSphere) {
+                            for (let dIdx of darkCells) {
+                                grid[Math.floor(dIdx / WIDTH)][dIdx % WIDTH] = 1;
+                            }
+                        }
                     }
                 }
             }
@@ -590,7 +609,6 @@
                 ctx.closePath();
             }
 
-            // --- DISEGNO CURSORE CON GLOW ---
             ctx.save();
             let pulseRadius = 3 + Math.abs(Math.sin(pulseTime)) * 4; 
             
@@ -603,7 +621,7 @@
             ctx.stroke(); 
             ctx.closePath();
 
-            ctx.shadowBlur = 0; // Reset ombre per il pixel centrale
+            ctx.shadowBlur = 0; 
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(player.x - 1, player.y - 1, 2, 2);
             ctx.restore();
