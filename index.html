@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gals Panic Minimal - Photo Challenge</title>
+    <style>
+        :root {
+            --cyan: #00f0ff;
+            --red: #ff0055;
+            --border-color: #e0e0e0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #111; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; overflow: hidden; }
+        
+        .phone-container {
+            width: 100%; max-width: 412px; height: 840px; background: white;
+            border-radius: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            overflow: hidden; display: flex; flex-direction: column; position: relative; border: 8px solid #222;
+        }
+
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; background: white; }
+        .screen.active { display: flex; }
+        
+        .header { padding: 20px; text-align: center; font-weight: 700; font-size: 18px; border-bottom: 1px solid var(--border-color); letter-spacing: 1px; text-transform: uppercase; }
+        .scroll-content { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
+        
+        .upload-zone {
+            width: 100%; aspect-ratio: 9/16; max-height: 250px; border: 2px dashed var(--border-color);
+            border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; position: relative; overflow: hidden; background: #fafafa;
+        }
+        .upload-zone img { width: 100%; height: 100%; object-fit: cover; display: none; filter: blur(5px); }
+        .upload-placeholder { position: absolute; text-align: center; font-size: 13px; color: #888; padding: 20px; }
+        .error-msg { color: var(--red); font-size: 12px; font-weight: 600; text-align: center; margin-top: -15px; display: none; }
+
+        .section-title { font-size: 13px; font-weight: 700; color: #000; letter-spacing: 0.5px; margin-bottom: 8px; text-transform: uppercase; }
+        .section-desc { font-size: 12px; color: #888; margin-top: -4px; margin-bottom: 12px; }
+
+        .range-slider { width: 100%; accent-color: #000; cursor: pointer; }
+        .slider-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; font-weight: 600; color: #aaa; }
+        .slider-labels span.active { color: #000; }
+
+        .attempts-row { display: flex; gap: 8px; }
+        .btn-attempt { flex: 1; padding: 10px 0; border: 1px solid var(--border-color); background: white; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .btn-attempt.active { border-color: #000; background: var(--cyan); color: #000; }
+
+        .toggle-container { display: flex; justify-content: space-between; align-items: center; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--red); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .btn-submit { background: #000; color: white; border: none; padding: 16px; font-weight: 700; font-size: 15px; border-radius: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .link-box { background: #eee; padding: 10px; border-radius: 8px; font-size: 11px; word-break: break-all; margin-top: 10px; border: 1px solid #ccc; display: none; }
+
+        /* --- GAMEPLAY --- */
+        .game-wrapper { flex: 1; background: #000; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .game-hud { position: absolute; top: 15px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; color: white; font-size: 12px; font-weight: 700; z-index: 10; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+        #gameCanvas { background: #000; }
+        
+        .btn-close-win {
+            position: absolute; top: 15px; right: 20px; font-size: 26px; color: white;
+            background: none; border: none; cursor: pointer; z-index: 30; display: none;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: transform 0.2s;
+        }
+        .btn-close-win:active { transform: scale(0.85); }
+
+        .game-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
+        .game-overlay.active { display: flex; }
+        .overlay-title { font-size: 28px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; }
+        .overlay-title.lose { color: var(--red); }
+        .btn-retry { background: #000; color: white; border: none; padding: 14px 28px; font-weight: 700; font-size: 14px; border-radius: 8px; cursor: pointer; text-transform: uppercase; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        
+        <!-- MITTENTE -->
+        <div id="screenRegia" class="screen">
+            <div class="header">Crea Sfida</div>
+            <div class="scroll-content">
+                
+                <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <strong>Carica Foto</strong><br>Solo JPG/PNG (Max 1.5MB)
+                    </div>
+                    <img id="uploadPreview" src="" alt="Preview">
+                    <input type="file" id="fileInput" accept=".jpg,.jpeg,.png" style="display:none;" onchange="handleFileSelect(this)">
+                </div>
+                <div id="uploadError" class="error-msg">File non valido o troppo pesante!</div>
+
+                <div>
+                    <div class="section-title">Difficoltà</div>
+                    <input type="range" id="diffSlider" class="range-slider" min="1" max="5" value="3" oninput="updateDiffLabels(this.value)">
+                    <div class="slider-labels">
+                        <span id="lbl1">1</span><span id="lbl2">2</span><span id="lbl3" class="active">3</span><span id="lbl4">4</span><span id="lbl5">5</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-title">Tentativi Massimi</div>
+                    <div class="attempts-row">
+                        <button class="btn-attempt" onclick="setAttempts(1, this)">1</button>
+                        <button class="btn-attempt" onclick="setAttempts(3, this)">3</button>
+                        <button class="btn-attempt" onclick="setAttempts(5, this)">5</button>
+                        <button class="btn-attempt btn-max active" onclick="setAttempts(Infinity, this)">Infiniti</button>
+                    </div>
+                </div>
+
+                <div class="toggle-container">
+                    <div>
+                        <div class="section-title" style="margin-bottom:2px;">Autodistruzione</div>
+                        <div class="section-desc" style="margin-bottom:0;">Cancella dopo la visualizzazione.</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autodistruzioneToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <button class="btn-submit" onclick="generateChallengeLink()">Genera Link Sfida</button>
+                <div id="linkContainer" class="link-box"></div>
+            </div>
+        </div>
+
+        <!-- DESTINATARIO -->
+        <div id="screenGame" class="screen">
+            <div class="game-hud" id="gameHud">
+                <span id="hudProgress">AREA: 0% / 80%</span>
+                <span id="hudAttempts">VITE: ∞</span>
+            </div>
+            <div class="game-wrapper">
+                <canvas id="gameCanvas" width="360" height="640"></canvas>
+                <button id="btnCloseWin" class="btn-close-win" onclick="resetToHome()">✕</button>
+                
+                <div id="gameOverlay" class="game-overlay">
+                    <div id="overlayTitle" class="overlay-title">Game Over</div>
+                    <div id="overlayDesc" style="font-size:14px; color:#666;">Tentativi esauriti.</div>
+                    <button id="overlayBtn" class="btn-retry" onclick="resetToHome()">Chiudi</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let challenge = { imgBase64: "", diff: 3, tries: Infinity, auto: false };
+        let currentAttempts = 0;
+        let loadedImage = new Image();
+
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            const errorEl = document.getElementById('uploadError');
+            if (!file) return;
+
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (!validTypes.includes(file.type)) { showUploadError("Formato non valido."); return; }
+            if (file.size > 1572864) { showUploadError("Massimo 1.5 MB."); return; }
+
+            errorEl.style.display = 'none';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('uploadPlaceholder').style.display = 'none';
+                const preview = document.getElementById('uploadPreview');
+                preview.src = e.target.result; preview.style.display = 'block';
+                challenge.imgBase64 = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showUploadError(msg) {
+            const errorEl = document.getElementById('uploadError');
+            errorEl.innerText = msg; errorEl.style.display = 'block';
+            document.getElementById('uploadPreview').style.display = 'none';
+            document.getElementById('uploadPlaceholder').style.display = 'block';
+            challenge.imgBase64 = "";
+        }
+
+        function updateDiffLabels(val) {
+            challenge.diff = parseInt(val);
+            for(let i=1; i<=5; i++) document.getElementById('lbl'+i).className = (i == val) ? 'active' : '';
+        }
+
+        function setAttempts(val, btn) {
+            challenge.tries = val;
+            document.querySelectorAll('.btn-attempt').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function generateChallengeLink() {
+            if(!challenge.imgBase64) { alert("Carica prima un'immagine!"); return; }
+            challenge.auto = document.getElementById('autodistruzioneToggle').checked;
+            const cleanBase64 = encodeURIComponent(challenge.imgBase64);
+            const baseUrl = window.location.href.split('?')[0];
+            const finalUrl = `${baseUrl}?d=${challenge.diff}&t=${challenge.tries}&a=${challenge.auto ? 1 : 0}&img=${cleanBase64}`;
+            const container = document.getElementById('linkContainer');
+            container.innerText = finalUrl; container.style.display = 'block';
+            navigator.clipboard.writeText(finalUrl);
+            alert("Link della sfida generato e copiato!");
+        }
+
+        // --- ENGINE DI GIOCO AD ALTA RISOLUZIONE E RENDERING DIRETTO ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const WIDTH = canvas.width;
+        const HEIGHT = canvas.height;
+        let grid = []; // Array bidimensionale 1-a-1. 0:coperto, 1:scoperto, 2:scia
+        let player = { x: 0, y: 0 };
+        let spheres = [];
+        let isDrawing = false, gameInterval = null, targetPercentage = 80;
+        let currentDir = null, isGameWon = false;
+        let pulseTime = 0;
+
+        let playerSpeedCounter = 0;
+        const playerSpeedStep = 3; // Passo veloce ma controllabile per tracciare pixel per pixel
+
+        let renderBox = { x: 0, y: 0, w: 0, h: 0 };
+
+        // Buffer di memoria pre-calcolati per prestazioni perfette
+        let colorPixels = null;
+        let bwPixels = null;
+        let screenImageData = null;
+
+        function checkUrlAndRouting() {
+            const params = new URLSearchParams(window.location.search);
+            if(params.has('img')) {
+                document.getElementById('screenRegia').classList.remove('active');
+                document.getElementById('screenGame').classList.add('active');
+                challenge.diff = parseInt(params.get('d')) || 3;
+                challenge.tries = params.get('t') === 'Infinity' ? Infinity : parseInt(params.get('t'));
+                challenge.auto = params.get('a') === '1';
+                currentAttempts = challenge.tries;
+                
+                loadedImage.onload = function() { initGame(); };
+                loadedImage.src = decodeURIComponent(params.get('img'));
+            } else {
+                document.getElementById('screenRegia').classList.add('active');
+            }
+        }
+
+        function initGame() {
+            const targets = [0, 60, 70, 80, 85, 90];
+            targetPercentage = targets[challenge.diff];
+            currentDir = null; isDrawing = false; isGameWon = false;
+
+            document.getElementById('gameHud').style.display = 'flex';
+            document.getElementById('btnCloseWin').style.display = 'none';
+            document.getElementById('hudProgress').innerText = `AREA: 0% / ${targetPercentage}%`;
+            document.getElementById('hudAttempts').innerText = `VITE: ${challenge.tries === Infinity ? '∞' : currentAttempts}`;
+            document.getElementById('gameOverlay').classList.remove('active');
+
+            // 1. Allineamento
+            let imgRatio = loadedImage.width / loadedImage.height;
+            let canvasRatio = WIDTH / HEIGHT;
+            if (imgRatio > canvasRatio) {
+                renderBox.w = WIDTH; renderBox.h = Math.floor(WIDTH / imgRatio);
+                renderBox.x = 0; renderBox.y = Math.floor((HEIGHT - renderBox.h) / 2);
+            } else {
+                renderBox.h = HEIGHT; renderBox.w = Math.floor(HEIGHT * imgRatio);
+                renderBox.y = 0; renderBox.x = Math.floor((WIDTH - renderBox.w) / 2);
+            }
+
+            // 2. Griglia Logica (Pixel Perfetti)
+            grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
+            for(let y=0; y<HEIGHT; y++) {
+                for(let x=0; x<WIDTH; x++) {
+                    if(x < renderBox.x || x >= renderBox.x + renderBox.w || y < renderBox.y || y >= renderBox.y + renderBox.h) {
+                        grid[y][x] = 1;
+                    } else if (x === renderBox.x || x === renderBox.x + renderBox.w - 1 || y === renderBox.y || y === renderBox.y + renderBox.h - 1) {
+                        grid[y][x] = 1; // Perimetro interno
+                    }
+                }
+            }
+            player.x = renderBox.x; player.y = renderBox.y;
+
+            // 3. Pre-Rendering dei Buffer (La magia dei colori e B/N pixelati)
+            let pixelChunks = 40; // Livello di pixelatura
+            let tempCanvas = document.createElement('canvas');
+            tempCanvas.width = pixelChunks; 
+            tempCanvas.height = Math.floor(pixelChunks / imgRatio);
+            let tCtx = tempCanvas.getContext('2d');
+            tCtx.drawImage(loadedImage, 0, 0, tempCanvas.width, tempCanvas.height);
+
+            // Buffer Colori
+            let colorCanvas = document.createElement('canvas');
+            colorCanvas.width = WIDTH; colorCanvas.height = HEIGHT;
+            let cCtx = colorCanvas.getContext('2d');
+            cCtx.imageSmoothingEnabled = false;
+            cCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, renderBox.x, renderBox.y, renderBox.w, renderBox.h);
+            colorPixels = cCtx.getImageData(0, 0, WIDTH, HEIGHT).data;
+
+            // Buffer Bianco e Nero Scurito (Generato matematicamente per prestazione)
+            bwPixels = new Uint8ClampedArray(colorPixels.length);
+            for(let i=0; i<colorPixels.length; i+=4) {
+                let r = colorPixels[i], g = colorPixels[i+1], b = colorPixels[i+2], a = colorPixels[i+3];
+                // Formula B&N Luminanza
+                let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                // Moltiplichiamo per 0.75 per applicare istantaneamente l'effetto ombra 25%
+                bwPixels[i] = gray * 0.75;
+                bwPixels[i+1] = gray * 0.75;
+                bwPixels[i+2] = gray * 0.75;
+                bwPixels[i+3] = a; 
+            }
+
+            screenImageData = new ImageData(WIDTH, HEIGHT);
+
+            // 4. Setup Sfere (Nascono al centro)
+            spheres = [];
+            let sSpeed = 1.0 + (challenge.diff * 0.4);
+            for(let i=0; i<challenge.diff; i++) {
+                spheres.push({
+                    x: WIDTH / 2, y: HEIGHT / 2,
+                    vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed,
+                    vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed,
+                    radius: 6 // Sfere piccole per schivate precise
+                });
+            }
+
+            setupSwipeControls();
+            if(gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(updateGame, 1000 / 60);
+        }
+
+        function setupSwipeControls() {
+            let tStart = {x:0, y:0};
+            window.ontouchstart = (e) => { tStart.x = e.touches[0].clientX; tStart.y = e.touches[0].clientY; };
+            window.ontouchend = (e) => {
+                let dx = e.changedTouches[0].clientX - tStart.x;
+                let dy = e.changedTouches[0].clientY - tStart.y;
+                if(Math.abs(dx) < 15 && Math.abs(dy) < 15) return;
+                if(Math.abs(dx) > Math.abs(dy)) { currentDir = dx > 0 ? 'R' : 'L'; }
+                else { currentDir = dy > 0 ? 'D' : 'U'; }
+            };
+            window.onkeydown = (e) => {
+                if(e.key === 'ArrowUp') currentDir = 'U'; if(e.key === 'ArrowDown') currentDir = 'D';
+                if(e.key === 'ArrowLeft') currentDir = 'L'; if(e.key === 'ArrowRight') currentDir = 'R';
+            };
+        }
+
+        function updateGame() {
+            if (isGameWon) return;
+            pulseTime += 0.15;
+
+            // Movimento Giocatore Fluido
+            if(currentDir) {
+                for(let step=0; step < playerSpeedStep; step++) {
+                    let nx = player.x; let ny = player.y;
+                    if(currentDir === 'U') ny--; if(currentDir === 'D') ny++;
+                    if(currentDir === 'L') nx--; if(currentDir === 'R') nx++;
+
+                    if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+                        let target = grid[ny][nx];
+                        if(target === 1) {
+                            if(isDrawing) {
+                                isDrawing = false; currentDir = null;
+                                finalizeConquest();
+                                break;
+                            }
+                            player.x = nx; player.y = ny;
+                        } else if(target === 0) {
+                            isDrawing = true; player.x = nx; player.y = ny; grid[ny][nx] = 2; 
+                        } else if(target === 2) {
+                            handleHit(); return;
+                        }
+                    } else { currentDir = null; break; }
+                }
+            }
+
+            // Movimento Sfere e Rimbalzi sui bordi scoperti
+            for(let s of spheres) {
+                s.x += s.vx; s.y += s.vy;
+
+                if (s.x - s.radius < 0) { s.x = s.radius; s.vx *= -1; }
+                if (s.x + s.radius > WIDTH) { s.x = WIDTH - s.radius; s.vx *= -1; }
+                if (s.y - s.radius < 0) { s.y = s.radius; s.vy *= -1; }
+                if (s.y + s.radius > HEIGHT) { s.y = HEIGHT - s.radius; s.vy *= -1; }
+
+                let checkX = Math.floor(s.x + (s.vx > 0 ? s.radius : -s.radius));
+                let checkY = Math.floor(s.y + (s.vy > 0 ? s.radius : -s.radius));
+
+                if(checkX >= 0 && checkX < WIDTH && checkY >= 0 && checkY < HEIGHT) {
+                    if(grid[checkY][checkX] === 1) {
+                        if (grid[Math.floor(s.y)][checkX] === 1) s.vx *= -1;
+                        if (grid[checkY][Math.floor(s.x)] === 1) s.vy *= -1;
+                    }
+                    if(grid[checkY][checkX] === 2) { handleHit(); return; }
+                }
+            }
+            draw();
+        }
+
+        // Algoritmo Flood Fill Veloce (1D array per prestazioni massime)
+        function finalizeConquest() {
+            // Fissa la scia in muro
+            for(let y=0; y<HEIGHT; y++){
+                for(let x=0; x<WIDTH; x++){
+                    if(grid[y][x] === 2) grid[y][x] = 1;
+                }
+            }
+
+            let visited = new Uint8Array(WIDTH * HEIGHT);
+            let regions = [];
+
+            for (let y = 0; y < HEIGHT; y++) {
+                for (let x = 0; x < WIDTH; x++) {
+                    let startIdx = y * WIDTH + x;
+                    
+                    if (grid[y][x] === 0 && visited[startIdx] === 0) {
+                        let cells = [];
+                        let queue = [startIdx];
+                        visited[startIdx] = 1;
+                        let hasSphere = false;
+                        let head = 0;
+
+                        while (head < queue.length) {
+                            let currIdx = queue[head++];
+                            cells.push(currIdx);
+                            let cy = Math.floor(currIdx / WIDTH);
+                            let cx = currIdx % WIDTH;
+
+                            // Check collisione sfera larga
+                            for(let s of spheres) {
+                                if(Math.abs(s.x - cx) < s.radius + 2 && Math.abs(s.y - cy) < s.radius + 2) hasSphere = true;
+                            }
+
+                            if (cy > 0 && grid[cy-1][cx] === 0 && visited[currIdx - WIDTH] === 0) { visited[currIdx - WIDTH] = 1; queue.push(currIdx - WIDTH); }
+                            if (cy < HEIGHT-1 && grid[cy+1][cx] === 0 && visited[currIdx + WIDTH] === 0) { visited[currIdx + WIDTH] = 1; queue.push(currIdx + WIDTH); }
+                            if (cx > 0 && grid[cy][cx-1] === 0 && visited[currIdx - 1] === 0) { visited[currIdx - 1] = 1; queue.push(currIdx - 1); }
+                            if (cx < WIDTH-1 && grid[cy][cx+1] === 0 && visited[currIdx + 1] === 0) { visited[currIdx + 1] = 1; queue.push(currIdx + 1); }
+                        }
+                        regions.push({ cells, hasSphere });
+                    }
+                }
+            }
+
+            for (let reg of regions) {
+                if (!reg.hasSphere) {
+                    for (let idx of reg.cells) {
+                        grid[Math.floor(idx / WIDTH)][idx % WIDTH] = 1;
+                    }
+                }
+            }
+            checkWin();
+        }
+
+        function handleHit() {
+            clearInterval(gameInterval); currentDir = null; isDrawing = false;
+            // Cancella traccia in caso di morte
+            for(let y=0; y<HEIGHT; y++) {
+                for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 0; }
+            }
+            if(challenge.tries !== Infinity) currentAttempts--;
+            if(currentAttempts <= 0 && challenge.tries !== Infinity) {
+                showOverlay("GAME OVER", "Tentativi esauriti.", "lose");
+            } else {
+                alert("La tua scia è stata colpita!"); initGame();
+            }
+        }
+
+        function checkWin() {
+            let disc = 0, tot = 0;
+            for(let y=renderBox.y; y < renderBox.y + renderBox.h; y++) {
+                for(let x=renderBox.x; x < renderBox.x + renderBox.w; x++) {
+                    tot++; if(grid[y][x] === 1) disc++;
+                }
+            }
+            let p = Math.floor((disc / tot) * 100); p = Math.min(p, 100);
+            document.getElementById('hudProgress').innerText = `AREA: ${p}% / ${targetPercentage}%`;
+            
+            if(p >= targetPercentage) {
+                clearInterval(gameInterval); isGameWon = true;
+                ctx.clearRect(0,0,WIDTH,HEIGHT);
+                ctx.drawImage(loadedImage, renderBox.x, renderBox.y, renderBox.w, renderBox.h);
+                document.getElementById('gameHud').style.display = 'none';
+                document.getElementById('btnCloseWin').style.display = 'block';
+            }
+        }
+
+        function showOverlay(title, desc, style) {
+            document.getElementById('overlayTitle').innerText = title;
+            document.getElementById('overlayDesc').innerText = desc;
+            document.getElementById('gameOverlay').classList.add('active');
+        }
+
+        function resetToHome() { window.location.href = window.location.href.split('?')[0]; }
+
+        function draw() {
+            if (isGameWon) return;
+            
+            let sData = screenImageData.data;
+
+            // IL CUORE DEL MOTORE: Rendering Pixel per Pixel ultra-veloce con Edge Detection
+            for (let y = 0; y < HEIGHT; y++) {
+                for (let x = 0; x < WIDTH; x++) {
+                    let i = (y * WIDTH + x) * 4;
+                    let val = grid[y][x];
+
+                    if (val === 1) {
+                        // EDGE DETECTION: Guarda i vicini. Se tocca il buio (0), diventa il bordo bianco.
+                        let isEdge = false;
+                        if (y > 0 && grid[y-1][x] === 0) isEdge = true;
+                        else if (y < HEIGHT-1 && grid[y+1][x] === 0) isEdge = true;
+                        else if (x > 0 && grid[y][x-1] === 0) isEdge = true;
+                        else if (x < WIDTH-1 && grid[y][x+1] === 0) isEdge = true;
+
+                        if (isEdge) {
+                            // Filetto perimetrale bianco puro
+                            sData[i]=255; sData[i+1]=255; sData[i+2]=255; sData[i+3]=255; 
+                        } else {
+                            // Area scoperta sicura a colori pixelata
+                            sData[i]=colorPixels[i]; sData[i+1]=colorPixels[i+1]; sData[i+2]=colorPixels[i+2]; sData[i+3]=255; 
+                        }
+                    } else if (val === 2) {
+                        // Scia di taglio (Bianca e precisa)
+                        sData[i]=255; sData[i+1]=255; sData[i+2]=255; sData[i+3]=255; 
+                    } else {
+                        // Area oscura da scoprire (B/N scuro e pixelato)
+                        sData[i]=bwPixels[i]; sData[i+1]=bwPixels[i+1]; sData[i+2]=bwPixels[i+2]; sData[i+3]=255; 
+                    }
+                }
+            }
+
+            // Scarica tutta l'immagine sul canvas in un colpo solo (Prestazioni fluide)
+            ctx.putImageData(screenImageData, 0, 0);
+
+            // DISEGNO SFERE (Bianche candide e dominanti, disegnate DOPO l'immagine)
+            for(let s of spheres) {
+                ctx.beginPath(); 
+                ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
+                ctx.fillStyle = '#ffffff'; // Bianco puro assoluto
+                ctx.fill(); 
+                ctx.closePath();
+            }
+
+            // DISEGNO CURSORE PULSANTE CIANO
+            let pulseRadius = 3 + Math.abs(Math.sin(pulseTime)) * 3; 
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, pulseRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'var(--cyan)'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.closePath();
+
+            // Perno logico visivo
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(player.x - 1, player.y - 1, 2, 2);
+        }
+
+        checkUrlAndRouting();
+    </script>
+</body>
+</html>
