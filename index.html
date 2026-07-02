@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gals Panic Minimal - Photo Challenge</title>
+    <title>UNVEIL - Photo Challenge</title>
     <style>
         :root {
             --cyan: #00f0ff;
@@ -13,7 +13,7 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
-        /* BLINDATURA ANTI-SCROLL: position fixed inchioda la webapp ai bordi esatti dello schermo visibile */
+        /* BLINDATURA TOTALE ANTI-SCROLL */
         body { 
             position: fixed; top: 0; bottom: 0; left: 0; right: 0;
             background-color: #000; display: flex; justify-content: center; align-items: center; 
@@ -40,33 +40,49 @@
         
         .scroll-content { padding: 30px 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; position: relative; }
         
+        /* BRAND LOGO CON DESIGN TAGLIATO (LASER SLICE) */
+        .brand-zone {
+            text-align: center; margin-bottom: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .brand-logo {
+            font-size: 42px; font-weight: 900; text-transform: uppercase; letter-spacing: -2px;
+            position: relative; display: inline-block; color: #000; line-height: 1;
+        }
+        .brand-logo::after {
+            content: ''; position: absolute; left: -10%; top: 50%; width: 120%; height: 3px;
+            background: var(--cyan); transform: rotate(-6deg); box-shadow: 0 0 10px var(--cyan);
+        }
+        .brand-subtitle {
+            font-size: 10px; font-weight: 800; color: #888; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px;
+        }
+        /* Cambio colore del logo quando c'è lo sfondo immersivo */
+        .dark-mode .brand-logo { color: #fff; }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px);
             border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             border: 1px solid rgba(0,0,0,0.05); transition: background 0.3s;
         }
 
-        /* Nuova disposizione bottoni Upload */
-        .upload-buttons-row {
-            display: flex; gap: 10px; width: 100%;
-        }
-        
+        /* STRUTTURA BOTTONI UPLOAD CON TRACCIATI LINEART BIANCHI */
+        .upload-buttons-row { display: flex; gap: 12px; width: 100%; }
         .upload-btn {
-            flex: 1; padding: 18px 10px; background: #000; color: white; text-align: center;
+            flex: 1; padding: 16px 10px; background: #000; color: white; text-align: center;
             border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer;
             text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.1s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
         }
         .upload-btn:active { transform: scale(0.96); }
-        .upload-btn.secondary { background: #fff; color: #000; border: 2px solid #000; padding: 16px 10px; }
+        .upload-btn svg { stroke: #fff; fill: none; transition: stroke 0.2s; }
+        
+        .upload-btn.secondary { background: #fff; color: #000; border: 2px solid #000; }
+        .upload-btn.secondary svg { stroke: #000; }
 
         .upload-status { text-align: center; font-size: 14px; font-weight: 800; color: #000; display: none; padding: 15px; border-radius: 10px; background: white; text-transform: uppercase; }
-
         .upload-desc { text-align: center; font-size: 11px; color: #666; margin-top: 15px; font-weight: 600; text-transform: uppercase; }
         .error-msg { color: var(--red); font-size: 13px; font-weight: 700; text-align: center; margin-top: 10px; display: none; }
 
         .section-title { font-size: 13px; font-weight: 800; color: #000; letter-spacing: 0.5px; margin-bottom: 12px; text-transform: uppercase; }
-        
         .range-slider { width: 100%; accent-color: #000; cursor: pointer; }
         .slider-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; font-weight: 800; color: #ccc; }
         .slider-labels span.active { color: #000; }
@@ -89,12 +105,18 @@
         .share-container { display: none; margin-top: 10px; }
         .btn-share { background: var(--cyan); color: #000; border: none; padding: 20px; font-weight: 900; font-size: 16px; border-radius: 12px; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 10px 20px rgba(0, 240, 255, 0.2); }
 
-        /* --- GAMEPLAY HUD --- */
+        /* --- GAMEPLAY HUD & EXIT BUTTON --- */
         .game-hud {
             width: 100%; height: 50px; background: #000; color: white;
-            display: flex; justify-content: space-between; align-items: center; padding: 0 20px;
-            font-size: 13px; font-weight: 800; z-index: 10; border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
+            font-size: 12px; font-weight: 800; z-index: 10; border-bottom: 1px solid #222;
         }
+        .hud-btn-exit {
+            background: none; border: 1px solid #333; color: #aaa; padding: 6px 12px;
+            border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer;
+            text-transform: uppercase; transition: all 0.2s;
+        }
+        .hud-btn-exit:active { background: var(--red); color: white; border-color: var(--red); }
 
         .game-wrapper { flex: 1; background: #000; position: relative; display: flex; flex-direction: column; overflow: hidden; touch-action: none; }
         #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; }
@@ -126,7 +148,12 @@
         <div id="appBg" class="app-bg"></div>
 
         <div id="screenRegia" class="screen active">
-            <div id="mainHeader" class="header">Gals Panic</div>
+            <div id="mainHeader" class="header">
+                <div class="brand-zone">
+                    <div class="brand-logo">Unveil</div>
+                    <div class="brand-subtitle">Photo Challenge</div>
+                </div>
+            </div>
             <div class="scroll-content">
                 
                 <div class="glass-panel">
@@ -134,10 +161,12 @@
                     <div id="uploadActionGroup">
                         <div class="upload-buttons-row">
                             <div class="upload-btn" onclick="document.getElementById('cameraInput').click()">
-                                <span style="font-size: 20px; margin-bottom: 2px;">📸</span> Selfie
+                                <svg width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                Selfie
                             </div>
                             <div class="upload-btn secondary" onclick="document.getElementById('galleryInput').click()">
-                                <span style="font-size: 20px; margin-bottom: 2px;">🖼️</span> Galleria
+                                <svg width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                Galleria
                             </div>
                         </div>
                         <div class="upload-desc">Ottimizzato per orientamento verticale</div>
@@ -192,6 +221,7 @@
 
         <div id="screenGame" class="screen">
             <div class="game-hud" id="gameHud">
+                <button class="hud-btn-exit" onclick="resetToHome()">✕ ESCI</button>
                 <span id="hudProgress">AREA: 0% / 80%</span>
                 <span id="hudAttempts">VITE: ∞</span>
             </div>
@@ -229,7 +259,6 @@
         loadedImage.crossOrigin = "Anonymous";
         let finalShareUrl = "";
 
-        // UI Updates
         function handleFileSelect(input) {
             const file = input.files[0];
             const errorEl = document.getElementById('uploadError');
@@ -248,12 +277,10 @@
             reader.onload = function(e) {
                 challenge.imgBase64 = e.target.result;
                 
-                // Aggiorna lo sfondo immersivo
                 const bg = document.getElementById('appBg');
                 bg.style.backgroundImage = `url(${e.target.result})`;
                 bg.style.opacity = '1';
                 
-                // Trasforma il testo per contrasto e cambia la UI dei pulsanti
                 document.getElementById('mainHeader').classList.add('dark-mode');
                 document.getElementById('uploadActionGroup').style.display = 'none';
                 document.getElementById('uploadStatusUI').style.display = 'block';
@@ -276,8 +303,8 @@
             if (navigator.share) {
                 try {
                     await navigator.share({
-                        title: 'Sfida Gals Panic',
-                        text: 'Ho creato una sfida fotografica per te! Riuscirai a scoprire la foto nascosta?',
+                        title: 'Sfida Unveil',
+                        text: 'Ho creato una sfida fotografica per te! Riuscirai a svelare la foto nascosta?',
                         url: finalShareUrl
                     });
                 } catch (err) { console.log('Condivisione annullata.', err); }
@@ -314,7 +341,6 @@
                     const baseUrl = window.location.href.split('?')[0];
                     finalShareUrl = `${baseUrl}?d=${challenge.diff}&t=${challenge.tries}&a=${challenge.auto ? 1 : 0}&img=${encodeURIComponent(shortImgUrl)}`;
 
-                    // Sostituzione In-Place del bottone
                     btn.style.display = 'none';
                     document.getElementById('shareContainer').style.display = 'block';
                 } else {
@@ -330,7 +356,7 @@
             }
         }
 
-        // --- FULLSCREEN E GIOCO ---
+        // --- ENGINE DI GIOCO ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -359,7 +385,6 @@
             }
         }
 
-        // Calcola l'immagine base ma aspetta il fullscreen per definire le misure esatte
         function initGameData() {
             const targets = [0, 60, 70, 80, 85, 90];
             targetPercentage = targets[challenge.diff];
@@ -376,12 +401,11 @@
         function startGameplay() {
             const elem = document.documentElement;
             
-            // Funzione eseguita DOPO la richiesta di fullscreen
             const finalizeStart = () => {
                 setTimeout(() => {
                     const wrapper = document.getElementById('gameWrapper');
                     
-                    // Ricalcolo esatto con il layout inchiodato. Non serve più il min(), il CSS garantisce l'altezza esatta
+                    // Sincronizzazione millimetrica post-fullscreen
                     WIDTH = wrapper.clientWidth;
                     HEIGHT = wrapper.clientHeight;
                     
@@ -448,13 +472,12 @@
 
                     document.getElementById('tutorialOverlay').style.display = 'none';
                     isPlaying = true; currentDir = null;
-                }, 300); // 300ms delay per assicurarci che il resize del OS sia finito
+                }, 300);
             };
 
-            // Richiesta Fullscreen API
             if (elem.requestFullscreen) {
                 elem.requestFullscreen().then(finalizeStart).catch(finalizeStart);
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
+            } else if (elem.webkitRequestFullscreen) {
                 elem.webkitRequestFullscreen(); finalizeStart();
             } else { finalizeStart(); }
         }
@@ -604,7 +627,7 @@
                 showOverlay("Game Over", "Tentativi esauriti.", "lose");
             } else {
                 alert(msg || "La scia è stata colpita!"); 
-                initGameData(); // Reinizializza reset ma mantiene fullscreen
+                initGameData(); 
                 isPlaying = true;
             }
         }
