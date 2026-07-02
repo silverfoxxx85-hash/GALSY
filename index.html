@@ -220,7 +220,7 @@
                         </li>
                         <li>
                             <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--cyan)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                            <span><b>Scudo Magnetico Anti-Errore:</b> Ogni volta che parti da un bordo sei protetto. Allontanati di 60px per attivare i magneti di cattura!</span>
+                            <span><b>Scudo Magnetico Anti-Errore:</b> Ogni volta che parti da un bordo sei protetto. Allontanati di 40px per attivare i magneti di cattura!</span>
                         </li>
                         <li>
                             <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--red)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -323,11 +323,11 @@
         let playerSpeed = 4.2; 
         let isRewinding = false; 
         
-        // FISICA DELLO SNAP E MECCANICA DI IMMUNITÀ DINAMICA
+        // 2. FISICA DELLE DISTANZE RICALIBRATA (DIMEZZATA SU TUO FEEDBACK)
         let isImmune = true; 
-        const IMMUNITY_THRESHOLD = 60; 
-        const SNAP_OUTER_BOUND = 50;  
-        const SNAP_INNER_WALL = 15;   
+        const IMMUNITY_THRESHOLD = 40; // Abbassata da 60 a 40
+        const SNAP_OUTER_BOUND = 25;   // Dimezzata da 50 a 25
+        const SNAP_INNER_WALL = 8;     // Chirurgico: dimezzato da 15 a 8
 
         let cropData = { x: 0, y: 0, w: 0, h: 0 };
         let colorPixels = null, bwPixels = null, screenImageData = null;
@@ -357,47 +357,58 @@
             document.getElementById('gameOverlay').classList.remove('active'); document.getElementById('tutorialOverlay').style.display = 'flex';
         }
 
+        // 1. BLINDATURA RIPRISTINATA: Il gioco richiede il fullscreen reale, azzerando le gesture mobile
         function startGameplay() {
-            const wrapper = document.getElementById('gameWrapper');
-            const rect = wrapper.getBoundingClientRect();
-            WIDTH = Math.floor(rect.width); HEIGHT = Math.floor(rect.height);
-            canvas.width = WIDTH; canvas.height = HEIGHT;
-
-            let imgRatio = loadedImage.width / loadedImage.height; let canvasRatio = WIDTH / HEIGHT;
-            cropData = { x: 0, y: 0, w: loadedImage.width, h: loadedImage.height };
-            if (imgRatio > canvasRatio) { cropData.w = Math.floor(loadedImage.height * canvasRatio); cropData.x = Math.floor((loadedImage.width - cropData.w) / 2); } 
-            else { cropData.h = Math.floor(loadedImage.width / canvasRatio); cropData.y = Math.floor((loadedImage.height - cropData.h) / 2); }
-
-            grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
-            for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; } }
+            const elem = document.documentElement;
             
-            player.x = Math.floor(WIDTH / 2); player.y = HEIGHT - 1;
-            currentPos.x = player.x; currentPos.y = player.y;
+            const finalizeStart = () => {
+                setTimeout(() => {
+                    const wrapper = document.getElementById('gameWrapper');
+                    const rect = wrapper.getBoundingClientRect();
+                    WIDTH = Math.floor(rect.width); HEIGHT = Math.floor(rect.height);
+                    canvas.width = WIDTH; canvas.height = HEIGHT;
 
-            let tempCanvas = document.createElement('canvas'); tempCanvas.width = 60; tempCanvas.height = Math.floor(60 / canvasRatio);
-            tempCanvas.getContext('2d').drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, tempCanvas.width, tempCanvas.height);
-            let colorCanvas = document.createElement('canvas'); colorCanvas.width = WIDTH; colorCanvas.height = HEIGHT;
-            let cCtx = colorCanvas.getContext('2d'); cCtx.imageSmoothingEnabled = false;
-            cCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, WIDTH, HEIGHT);
-            colorPixels = cCtx.getImageData(0, 0, WIDTH, HEIGHT).data;
+                    let imgRatio = loadedImage.width / loadedImage.height; let canvasRatio = WIDTH / HEIGHT;
+                    cropData = { x: 0, y: 0, w: loadedImage.width, h: loadedImage.height };
+                    if (imgRatio > canvasRatio) { cropData.w = Math.floor(loadedImage.height * canvasRatio); cropData.x = Math.floor((loadedImage.width - cropData.w) / 2); } 
+                    else { cropData.h = Math.floor(loadedImage.width / canvasRatio); cropData.y = Math.floor((loadedImage.height - cropData.h) / 2); }
 
-            bwPixels = new Uint8ClampedArray(colorPixels.length);
-            for(let i=0; i<colorPixels.length; i+=4) {
-                let r = colorPixels[i], g = colorPixels[i+1], b = colorPixels[i+2], a = colorPixels[i+3];
-                let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                bwPixels[i] = gray * 0.75; bwPixels[i+1] = gray * 0.75; bwPixels[i+2] = gray * 0.75; bwPixels[i+3] = a; 
-            }
+                    grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
+                    for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; } }
+                    
+                    player.x = Math.floor(WIDTH / 2); player.y = HEIGHT - 1;
+                    currentPos.x = player.x; currentPos.y = player.y;
 
-            screenImageData = new ImageData(WIDTH, HEIGHT); spheres = [];
-            let sSpeed = 1.0 + (challenge.diff * 0.4);
-            for(let i=0; i<challenge.diff; i++) { spheres.push({ x: WIDTH / 2, y: HEIGHT / 2, vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed, vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed, radius: 6 }); }
+                    let tempCanvas = document.createElement('canvas'); tempCanvas.width = 60; tempCanvas.height = Math.floor(60 / canvasRatio);
+                    tempCanvas.getContext('2d').drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, tempCanvas.width, tempCanvas.height);
+                    let colorCanvas = document.createElement('canvas'); colorCanvas.width = WIDTH; colorCanvas.height = HEIGHT;
+                    let cCtx = colorCanvas.getContext('2d'); cCtx.imageSmoothingEnabled = false;
+                    cCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, WIDTH, HEIGHT);
+                    colorPixels = cCtx.getImageData(0, 0, WIDTH, HEIGHT).data;
 
-            setupFluidControls();
-            if(gameInterval) clearInterval(gameInterval);
-            gameInterval = setInterval(updateGame, 1000 / 60);
+                    bwPixels = new Uint8ClampedArray(colorPixels.length);
+                    for(let i=0; i<colorPixels.length; i+=4) {
+                        let r = colorPixels[i], g = colorPixels[i+1], b = colorPixels[i+2], a = colorPixels[i+3];
+                        let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                        bwPixels[i] = gray * 0.75; bwPixels[i+1] = gray * 0.75; bwPixels[i+2] = gray * 0.75; bwPixels[i+3] = a; 
+                    }
 
-            document.getElementById('tutorialOverlay').style.display = 'none';
-            isPlaying = true; trailPoints = []; isImmune = true; 
+                    screenImageData = new ImageData(WIDTH, HEIGHT); spheres = [];
+                    let sSpeed = 1.0 + (challenge.diff * 0.4);
+                    for(let i=0; i<challenge.diff; i++) { spheres.push({ x: WIDTH / 2, y: HEIGHT / 2, vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed, vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed, radius: 6 }); }
+
+                    setupFluidControls();
+                    if(gameInterval) clearInterval(gameInterval);
+                    gameInterval = setInterval(updateGame, 1000 / 60);
+
+                    document.getElementById('tutorialOverlay').style.display = 'none';
+                    isPlaying = true; trailPoints = []; isImmune = true; 
+                }, 300);
+            };
+
+            if (elem.requestFullscreen) { elem.requestFullscreen().then(finalizeStart).catch(finalizeStart); } 
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); finalizeStart(); } 
+            else { finalizeStart(); }
         }
 
         function setupFluidControls() {
@@ -479,31 +490,21 @@
 
         function checkImmunityDeactivation(cx, cy) {
             if (!isImmune) return;
-            
-            // Per disattivare l'immunità, il giocatore deve essere lontano >60px da OGNI elemento sicuro (muro/perimetro)
             let isNearSafeElement = false;
-            let step = 4; // Passo di scansione veloce per non rallentare il frame rate
+            let step = 2; 
             
             for (let dy = -IMMUNITY_THRESHOLD; dy <= IMMUNITY_THRESHOLD; dy += step) {
                 for (let dx = -IMMUNITY_THRESHOLD; dx <= IMMUNITY_THRESHOLD; dx += step) {
-                    let testX = Math.floor(cx + dx);
-                    let testY = Math.floor(cy + dy);
+                    let testX = Math.floor(cx + dx); let testY = Math.floor(cy + dy);
                     if (testX >= 0 && testX < WIDTH && testY >= 0 && testY < HEIGHT) {
                         if (grid[testY][testX] === 1) {
-                            if (Math.hypot(dx, dy) < IMMUNITY_THRESHOLD) {
-                                isNearSafeElement = true;
-                                break;
-                            }
+                            if (Math.hypot(dx, dy) < IMMUNITY_THRESHOLD) { isNearSafeElement = true; break; }
                         }
                     }
                 }
                 if (isNearSafeElement) break;
             }
-            
-            // Se non si trova vicino a nessun elemento sicuro, ha guadagnato il mare aperto: rimuovi immunità
-            if (!isNearSafeElement) {
-                isImmune = false;
-            }
+            if (!isNearSafeElement) { isImmune = false; }
         }
 
         function updateGame() {
@@ -538,23 +539,20 @@
                     let moveDist = Math.min(playerSpeed, dist);
                     let newX = currentPos.x + (dx / dist) * moveDist; let newY = currentPos.y + (dy / dist) * moveDist;
 
-                    // Controlla se la posizione attuale permette di spegnere lo scudo protettivo
-                    if (isImmune) {
-                        checkImmunityDeactivation(newX, newY);
-                    }
+                    if (isImmune) { checkImmunityDeactivation(newX, newY); }
 
-                    // SNAP GRAVITAZIONALE STRUTTURALE (Attivo solo se NON si è immuni)
+                    // SNAP GRAVITAZIONALE LIVE STRUTTURALE (Ricalibrato a metà raggio)
                     if (!isImmune && isDrawing && trailPoints.length > 8) {
                         let forcedSnap = false;
                         let snapX = Math.floor(newX); let snapY = Math.floor(newY);
 
-                        // 1. SNAP PERIMETRALE ESTERNO (Molto tollerante ed energico: 50px)
+                        // 1. SNAP PERIMETRALE ESTERNO (Tolleranza ottimizzata a 25px)
                         if (snapX < SNAP_OUTER_BOUND) { snapX = 0; forcedSnap = true; } 
                         else if (snapX > WIDTH - 1 - SNAP_OUTER_BOUND) { snapX = WIDTH - 1; forcedSnap = true; }
                         if (snapY < SNAP_OUTER_BOUND) { snapY = 0; forcedSnap = true; } 
                         else if (snapY > HEIGHT - 1 - SNAP_OUTER_BOUND) { snapY = HEIGHT - 1; forcedSnap = true; }
 
-                        // 2. SNAP DELLE LINEE INTERNE (Chirurgico e stretto: 15px per evitare softlock)
+                        // 2. SNAP DELLE LINEE INTERNE (Chirurgico a 8px)
                         if (!forcedSnap) {
                             let closestSafe = null; let minDist = SNAP_INNER_WALL;
                             let intX = Math.floor(newX); let intY = Math.floor(newY);
@@ -685,16 +683,14 @@
             }
             for (let comp of components) { if (!comp.hasSphere) { for (let dIdx of comp.cells) { grid[Math.floor(dIdx / WIDTH)][dIdx % WIDTH] = 1; } } }
             
-            // CONQUISTA COMPLETATA: Ripristina immediatamente l'immunità protettiva per il prossimo decollo
-            isImmune = true;
+            isImmune = true; 
             checkWin();
         }
 
         function handleHit(msg) {
             isPlaying = false; isPointerDown = false; isRewinding = false; targetPos.x = null; targetPos.y = null; isDrawing = false;
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 0; } }
-            trailPoints = []; 
-            isImmune = true; // Ripristina l'immunità al reset
+            trailPoints = []; isImmune = true; 
             if(challenge.tries !== Infinity) currentAttempts--;
             if(currentAttempts <= 0 && challenge.tries !== Infinity) { showOverlay("Game Over", "Tentativi esauriti.", "lose");
             } else { alert(msg || "La scia è stata colpita!"); initGameData(); isPlaying = true; }
@@ -767,7 +763,7 @@
             let pulseRadius = 5 + Math.abs(Math.sin(pulseTime)) * 6; 
             ctx.beginPath(); ctx.arc(currentPos.x, currentPos.y, pulseRadius, 0, Math.PI * 2);
             
-            // Mostra un feedback visivo sul mirino (Ciano = Vulnerabile/Pronto a snappare, Rosso = Protetto da scudo immunità)
+            // Feedback visivo: Rosso = protetto da immunità (sensori spenti), Ciano = vulnerabile in gioco (sensori caldi)
             let indicatorColor = isImmune ? 'rgba(255, 0, 85, 0.8)' : '#00f0ff';
             ctx.shadowBlur = 25; ctx.shadowColor = indicatorColor; ctx.strokeStyle = indicatorColor; ctx.lineWidth = 3; ctx.stroke(); ctx.closePath();
             
