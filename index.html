@@ -1,4 +1,3 @@
-HTML
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -14,15 +13,20 @@ HTML
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
+        /* 1. BLINDATURA VIEWPORT: Rimossa la centratura flessibile che causava l'offset */
         body { 
             position: fixed; top: 0; bottom: 0; left: 0; right: 0;
-            background-color: #000; display: flex; justify-content: center; align-items: center; 
-            color: var(--text-color); overflow: hidden; margin: 0; touch-action: none;
+            background-color: #000; overflow: hidden; margin: 0; touch-action: none;
         }
         
-        /* SPLASH SCREEN ANIMATO */
+        .app-container {
+            width: 100vw; height: 100dvh; background: var(--bg-color);
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+            margin: 0 auto;
+        }
+
         #splashScreen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
             background: #000; z-index: 999; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; transition: opacity 0.5s ease;
         }
@@ -36,15 +40,10 @@ HTML
         }
         @keyframes pulseNeon { 0% { text-shadow: 0 0 10px rgba(0,240,255,0.3); } 50% { text-shadow: 0 0 30px rgba(0,240,255,0.8); } 100% { text-shadow: 0 0 10px rgba(0,240,255,0.3); } }
 
-        .app-container {
-            width: 100%; max-width: 500px; height: 100%; background: var(--bg-color);
-            display: flex; flex-direction: column; position: relative; overflow: hidden;
-        }
-
         .app-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center;
-            filter: blur(12px) brightness(0.25); opacity: 0; transition: opacity 0.6s ease; z-index: 0;
+            filter: blur(15px) brightness(0.25); opacity: 0; transition: opacity 0.6s ease; z-index: 0;
         }
 
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; position: relative; z-index: 1; }
@@ -55,7 +54,6 @@ HTML
         
         .scroll-content { padding: 30px 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; position: relative; }
         
-        /* BRAND LOGO MASSICCIO */
         .brand-zone { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .brand-logo { font-size: 64px; font-weight: 900; text-transform: uppercase; letter-spacing: -3px; position: relative; display: inline-block; color: #000; line-height: 1; }
         .brand-logo::after { content: ''; position: absolute; left: -10%; top: 52%; width: 120%; height: 5px; background: var(--cyan); transform: rotate(-6deg); box-shadow: 0 0 15px var(--cyan); }
@@ -98,7 +96,7 @@ HTML
         .share-container { display: none; margin-top: 10px; }
         .btn-share { background: var(--cyan); color: #000; border: none; padding: 20px; font-weight: 900; font-size: 16px; border-radius: 12px; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 10px 20px rgba(0, 240, 255, 0.2); display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-        /* --- GAMEPLAY HUD --- */
+        /* HUD & GAME LAYOUT */
         .game-hud { width: 100%; height: 50px; background: #000; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; font-weight: 800; z-index: 10; border-bottom: 1px solid #111; }
         .hud-btn-exit { background: none; border: 1px solid #333; color: #aaa; padding: 6px 12px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
         .hud-btn-exit:active { background: var(--red); color: white; border-color: var(--red); }
@@ -106,7 +104,6 @@ HTML
         .game-wrapper { flex: 1; background: #000; position: relative; display: flex; flex-direction: column; overflow: hidden; touch-action: none; }
         #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; z-index: 2; position: relative; }
         
-        /* OVERLAY VIGNETTATURA NEON */
         .vignette-overlay { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 5; background: radial-gradient(circle at center, transparent 50%, rgba(0, 240, 255, 0.15) 100%); }
 
         .btn-close-win { position: absolute; top: 15px; right: 20px; font-size: 24px; color: #000; background: var(--cyan); width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; z-index: 30; display: none; font-weight: bold; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
@@ -126,7 +123,6 @@ HTML
 </head>
 <body>
 
-    <!-- SPLASH SCREEN -->
     <div id="splashScreen">
         <div class="brand-zone">
             <div class="brand-logo splash-logo">Unveil</div>
@@ -136,7 +132,7 @@ HTML
     <div class="app-container">
         <div id="appBg" class="app-bg"></div>
 
-        <!-- MITTENTE / REGIA -->
+        <!-- REGIA -->
         <div id="screenRegia" class="screen active">
             <div id="mainHeader" class="header">
                 <div class="brand-zone">
@@ -145,7 +141,6 @@ HTML
                 </div>
             </div>
             <div class="scroll-content">
-                
                 <div class="glass-panel">
                     <div id="uploadActionGroup">
                         <div class="upload-buttons-row">
@@ -175,7 +170,6 @@ HTML
                             <span id="lbl1">1</span><span id="lbl2">2</span><span id="lbl3" class="active">3</span><span id="lbl4">4</span><span id="lbl5">5</span>
                         </div>
                     </div>
-
                     <div style="margin-top: 25px;">
                         <div class="section-title">Tentativi Massimi</div>
                         <div class="attempts-row">
@@ -185,7 +179,6 @@ HTML
                             <button class="btn-attempt btn-max active" onclick="setAttempts(Infinity, this)">∞</button>
                         </div>
                     </div>
-
                     <div class="toggle-container" style="margin-top: 25px;">
                         <div>
                             <div class="section-title" style="margin-bottom:2px;">Autodistruzione</div>
@@ -199,7 +192,6 @@ HTML
                 </div>
 
                 <button id="btnSubmit" class="btn-submit" onclick="generateChallengeLink()">Genera Sfida</button>
-                
                 <div id="shareContainer" class="share-container">
                     <button class="btn-share" onclick="triggerNativeShare()">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
@@ -209,7 +201,7 @@ HTML
             </div>
         </div>
 
-        <!-- DESTINATARIO / GAMEPLAY -->
+        <!-- GAMEPLAY -->
         <div id="screenGame" class="screen">
             <div class="game-hud" id="gameHud">
                 <button class="hud-btn-exit" onclick="resetToHome()">✕ ESCI</button>
@@ -218,7 +210,7 @@ HTML
             </div>
             
             <div class="game-wrapper" id="gameWrapper">
-                <div class="vignette-overlay"></div> <!-- EFFETTO NEON PERIMETRALE -->
+                <div class="vignette-overlay"></div>
                 <canvas id="gameCanvas"></canvas>
                 <button id="btnCloseWin" class="btn-close-win" style="display:none;" onclick="resetToHome()">✕</button>
                 
@@ -231,11 +223,11 @@ HTML
                         </li>
                         <li>
                             <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--cyan)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                            <span><b>Ritorna alle aree svelate</b> per chiudere i circuiti neon.</span>
+                            <span><b>Ritorna alle aree svelate</b> per chiudere i circuiti neon. Se alzi il dito, la scia si riavvolgerà!</span>
                         </li>
                         <li>
                             <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--red)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                            <span><b>Evita le sfere!</b> Se toccano la tua scia, perdi una vita.</span>
+                            <span><b>Evita le sfere!</b> Se toccano la tua scia (anche mentre si riavvolge), perdi una vita.</span>
                         </li>
                     </ul>
                     <button class="btn-submit" style="width: 100%; margin-top: 10px;" onclick="startGameplay()">Inizia a Giocare</button>
@@ -255,11 +247,9 @@ HTML
         
         let challenge = { imgBase64: "", diff: 3, tries: Infinity, auto: false };
         let currentAttempts = 0;
-        let loadedImage = new Image();
-        loadedImage.crossOrigin = "Anonymous";
+        let loadedImage = new Image(); loadedImage.crossOrigin = "Anonymous";
         let finalShareUrl = "";
 
-        // GESTIONE SPLASH SCREEN
         window.onload = () => {
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
@@ -275,22 +265,15 @@ HTML
             if (!file) return;
 
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-            if (!validTypes.includes(file.type)) { 
-                errorEl.innerText = "Formato non valido."; errorEl.style.display = 'block'; return; 
-            }
-            if (file.size > 8388608) { 
-                errorEl.innerText = "Massimo 8 MB."; errorEl.style.display = 'block'; return; 
-            }
+            if (!validTypes.includes(file.type)) { errorEl.innerText = "Formato non valido."; errorEl.style.display = 'block'; return; }
+            if (file.size > 8388608) { errorEl.innerText = "Massimo 8 MB."; errorEl.style.display = 'block'; return; }
 
             errorEl.style.display = 'none';
             const reader = new FileReader();
             reader.onload = function(e) {
                 challenge.imgBase64 = e.target.result;
-                
                 const bg = document.getElementById('appBg');
-                bg.style.backgroundImage = `url(${e.target.result})`;
-                bg.style.opacity = '1';
-                
+                bg.style.backgroundImage = `url(${e.target.result})`; bg.style.opacity = '1';
                 document.getElementById('mainHeader').classList.add('dark-mode');
                 document.getElementById('uploadActionGroup').style.display = 'none';
                 document.getElementById('uploadStatusUI').style.display = 'block';
@@ -303,9 +286,8 @@ HTML
 
         async function triggerNativeShare() {
             if (navigator.share) {
-                try { await navigator.share({ title: 'Sfida Unveil', text: 'Ho creato una sfida fotografica per te! Riuscirai a svelare la foto nascosta?', url: finalShareUrl });
-                } catch (err) { console.log('Condivisione annullata.', err); }
-            } else { navigator.clipboard.writeText(finalShareUrl); alert("Link copiato negli appunti!"); }
+                try { await navigator.share({ title: 'Sfida Unveil', text: 'Ho creato una sfida fotografica per te!', url: finalShareUrl }); } catch (err) {}
+            } else { navigator.clipboard.writeText(finalShareUrl); alert("Link copiato!"); }
         }
 
         async function generateChallengeLink() {
@@ -317,7 +299,6 @@ HTML
             try {
                 const base64Data = challenge.imgBase64.split(',')[1];
                 const formData = new FormData(); formData.append("image", base64Data);
-
                 const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
                 const data = await response.json();
 
@@ -327,10 +308,10 @@ HTML
                     finalShareUrl = `${baseUrl}?d=${challenge.diff}&t=${challenge.tries}&a=${challenge.auto ? 1 : 0}&img=${encodeURIComponent(shortImgUrl)}`;
                     btn.style.display = 'none'; document.getElementById('shareContainer').style.display = 'block';
                 } else { alert("Errore ImgBB: " + data.error.message); btn.innerHTML = originalText; btn.disabled = false; }
-            } catch (error) { console.error(error); alert("Errore di rete durante il caricamento."); btn.innerHTML = originalText; btn.disabled = false; }
+            } catch (error) { alert("Errore di rete."); btn.innerHTML = originalText; btn.disabled = false; }
         }
 
-        // --- MOTORE DI GIOCO (FLUID TRACKING & NEON ENGINE) ---
+        // --- MOTORE DI GIOCO ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -339,12 +320,12 @@ HTML
         let isDrawing = false, gameInterval = null, targetPercentage = 80;
         let isGameWon = false, pulseTime = 0, isPlaying = false; 
         
-        // VARIABILI MOTORE FLUIDO
-        let player = { x: 0, y: 0 }; // Coordinate Pixel Logiche
-        let currentPos = { x: 0, y: 0 }; // Coordinate Decimali Reali
-        let targetPos = { x: null, y: null }; // Dove l'utente tocca
+        let player = { x: 0, y: 0 }; 
+        let currentPos = { x: 0, y: 0 }; 
+        let targetPos = { x: null, y: null }; 
         let isPointerDown = false;
         let playerSpeed = 3.5; 
+        let isRewinding = false; // 4. STATO RIAVVOLGIMENTO ELASTICO
         
         let cropData = { x: 0, y: 0, w: 0, h: 0 };
         let colorPixels = null, bwPixels = null, screenImageData = null;
@@ -357,28 +338,21 @@ HTML
                 document.getElementById('screenGame').classList.add('active');
                 challenge.diff = parseInt(params.get('d')) || 3;
                 challenge.tries = params.get('t') === 'Infinity' ? Infinity : parseInt(params.get('t'));
-                challenge.auto = params.get('a') === '1';
-                currentAttempts = challenge.tries;
-                
+                challenge.auto = params.get('a') === '1'; currentAttempts = challenge.tries;
                 loadedImage.onload = function() { initGameData(); };
-                loadedImage.onerror = function() { alert("Impossibile caricare l'immagine."); };
                 loadedImage.src = decodeURIComponent(params.get('img'));
-            } else {
-                document.getElementById('screenRegia').classList.add('active');
-            }
+            } else { document.getElementById('screenRegia').classList.add('active'); }
         }
 
         function initGameData() {
             const targets = [0, 60, 70, 80, 85, 90]; targetPercentage = targets[challenge.diff];
-            isDrawing = false; isGameWon = false; isPlaying = false; trailPoints = [];
+            isDrawing = false; isGameWon = false; isPlaying = false; isRewinding = false; trailPoints = [];
             targetPos = { x: null, y: null }; isPointerDown = false;
 
-            document.getElementById('gameHud').style.display = 'flex';
-            document.getElementById('btnCloseWin').style.display = 'none';
+            document.getElementById('gameHud').style.display = 'flex'; document.getElementById('btnCloseWin').style.display = 'none';
             document.getElementById('hudProgress').innerText = `AREA: 0% / ${targetPercentage}%`;
             document.getElementById('hudAttempts').innerText = `VITE: ${challenge.tries === Infinity ? '∞' : currentAttempts}`;
-            document.getElementById('gameOverlay').classList.remove('active');
-            document.getElementById('tutorialOverlay').style.display = 'flex';
+            document.getElementById('gameOverlay').classList.remove('active'); document.getElementById('tutorialOverlay').style.display = 'flex';
         }
 
         function startGameplay() {
@@ -389,32 +363,19 @@ HTML
                     WIDTH = wrapper.clientWidth; HEIGHT = wrapper.clientHeight;
                     canvas.width = WIDTH; canvas.height = HEIGHT;
 
-                    let imgRatio = loadedImage.width / loadedImage.height;
-                    let canvasRatio = WIDTH / HEIGHT;
+                    let imgRatio = loadedImage.width / loadedImage.height; let canvasRatio = WIDTH / HEIGHT;
                     cropData = { x: 0, y: 0, w: loadedImage.width, h: loadedImage.height };
-
-                    if (imgRatio > canvasRatio) {
-                        cropData.w = Math.floor(loadedImage.height * canvasRatio);
-                        cropData.x = Math.floor((loadedImage.width - cropData.w) / 2);
-                    } else {
-                        cropData.h = Math.floor(loadedImage.width / canvasRatio);
-                        cropData.y = Math.floor((loadedImage.height - cropData.h) / 2);
-                    }
+                    if (imgRatio > canvasRatio) { cropData.w = Math.floor(loadedImage.height * canvasRatio); cropData.x = Math.floor((loadedImage.width - cropData.w) / 2); } 
+                    else { cropData.h = Math.floor(loadedImage.width / canvasRatio); cropData.y = Math.floor((loadedImage.height - cropData.h) / 2); }
 
                     grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
-                    for(let y=0; y<HEIGHT; y++) {
-                        for(let x=0; x<WIDTH; x++) {
-                            if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; 
-                        }
-                    }
+                    for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; } }
                     
                     player.x = Math.floor(WIDTH / 2); player.y = HEIGHT - 1;
                     currentPos.x = player.x; currentPos.y = player.y;
 
                     let tempCanvas = document.createElement('canvas'); tempCanvas.width = 60; tempCanvas.height = Math.floor(60 / canvasRatio);
-                    let tCtx = tempCanvas.getContext('2d');
-                    tCtx.drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, tempCanvas.width, tempCanvas.height);
-
+                    tempCanvas.getContext('2d').drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, tempCanvas.width, tempCanvas.height);
                     let colorCanvas = document.createElement('canvas'); colorCanvas.width = WIDTH; colorCanvas.height = HEIGHT;
                     let cCtx = colorCanvas.getContext('2d'); cCtx.imageSmoothingEnabled = false;
                     cCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, WIDTH, HEIGHT);
@@ -427,12 +388,9 @@ HTML
                         bwPixels[i] = gray * 0.75; bwPixels[i+1] = gray * 0.75; bwPixels[i+2] = gray * 0.75; bwPixels[i+3] = a; 
                     }
 
-                    screenImageData = new ImageData(WIDTH, HEIGHT);
-                    spheres = [];
+                    screenImageData = new ImageData(WIDTH, HEIGHT); spheres = [];
                     let sSpeed = 1.0 + (challenge.diff * 0.4);
-                    for(let i=0; i<challenge.diff; i++) {
-                        spheres.push({ x: WIDTH / 2, y: HEIGHT / 2, vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed, vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed, radius: 6 });
-                    }
+                    for(let i=0; i<challenge.diff; i++) { spheres.push({ x: WIDTH / 2, y: HEIGHT / 2, vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed, vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed, radius: 6 }); }
 
                     setupFluidControls();
                     if(gameInterval) clearInterval(gameInterval);
@@ -442,13 +400,10 @@ HTML
                     isPlaying = true; trailPoints = [];
                 }, 300);
             };
-
-            if (elem.requestFullscreen) { elem.requestFullscreen().then(finalizeStart).catch(finalizeStart);
-            } else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); finalizeStart();
-            } else { finalizeStart(); }
+            if (elem.requestFullscreen) { elem.requestFullscreen().then(finalizeStart).catch(finalizeStart); } 
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); finalizeStart(); } else { finalizeStart(); }
         }
 
-        // --- SISTEMA DI PUNTAMENTO A INSEGUIMENTO (POINTER EVENTS) ---
         function setupFluidControls() {
             function updateTarget(e) {
                 let rect = canvas.getBoundingClientRect();
@@ -456,29 +411,32 @@ HTML
                 let clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 targetPos.x = clientX - rect.left; targetPos.y = clientY - rect.top;
             }
-            canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); isPointerDown = true; updateTarget(e); });
+            canvas.addEventListener('pointerdown', (e) => { 
+                e.preventDefault(); 
+                if(!isRewinding) { isPointerDown = true; updateTarget(e); } 
+            });
             canvas.addEventListener('pointermove', (e) => { e.preventDefault(); if (isPointerDown) updateTarget(e); });
-            canvas.addEventListener('pointerup', () => { isPointerDown = false; targetPos.x = null; targetPos.y = null; });
-            canvas.addEventListener('pointercancel', () => { isPointerDown = false; targetPos.x = null; targetPos.y = null; });
+            
+            // 4. TRIGGER RIAVVOLGIMENTO AL RILASCIO DEL DITO
+            const handlePointerUp = () => {
+                isPointerDown = false; targetPos.x = null; targetPos.y = null;
+                if (isDrawing && !isRewinding) { isRewinding = true; } // Avvia il rewind se stai tagliando
+            };
+            canvas.addEventListener('pointerup', handlePointerUp);
+            canvas.addEventListener('pointercancel', handlePointerUp);
         }
 
-        // ALGORITMO DI BRESENHAM PER EVITARE IL TUNNELING
         function getBresenhamPoints(x0, y0, x1, y1) {
-            let pts = [];
-            let dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-            let dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+            let pts = []; let dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1; let dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
             let err = dx + dy, e2;
             while (true) {
-                pts.push({x: x0, y: y0});
-                if (x0 === x1 && y0 === y1) break;
-                e2 = 2 * err;
-                if (e2 >= dy) { err += dy; x0 += sx; }
-                if (e2 <= dx) { err += dx; y0 += sy; }
+                pts.push({x: x0, y: y0}); if (x0 === x1 && y0 === y1) break;
+                e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; }
             }
             return pts;
         }
 
-        // SNAP MAGNETICO PER FACILITARE LA CHIUSURA
+        // 2. FUNZIONE DI AUTO-SNAP MAGNETICO
         function getClosestSafeZone(x, y, radius) {
             for(let r=1; r<=radius; r++) {
                 for(let dy=-r; dy<=r; dy++) {
@@ -494,34 +452,32 @@ HTML
         function processPixel(nx, ny) {
             if (nx < 0) nx = 0; if (nx >= WIDTH) nx = WIDTH - 1;
             if (ny < 0) ny = 0; if (ny >= HEIGHT) ny = HEIGHT - 1;
-
             let target = grid[ny][nx];
 
-            if (target === 1) { // ZONA SICURA
+            if (target === 1) { 
                 if (isDrawing) { isDrawing = false; player.x = nx; player.y = ny; finalizeConquest(); return true; }
                 player.x = nx; player.y = ny;
-            } else if (target === 0 || target === 2) { // ZONA OSCURA / SCIA
+            } else if (target === 0 || target === 2) { 
                 if (!isDrawing && target === 0) { isDrawing = true; trailPoints = []; }
-
                 if (isDrawing) {
-                    // SNAP MAGNETICO (Hitbox agevolata a fine corsa)
-                    if (trailPoints.length > 5) {
-                        let safePoint = getClosestSafeZone(nx, ny, 2);
-                        if (safePoint) { isDrawing = false; player.x = safePoint.x; player.y = safePoint.y; finalizeConquest(); return true; }
+                    
+                    // 2. CONTROLLO AUTO-SNAP CONTINUO (Ampio raggio per evitare frustrazione)
+                    if (trailPoints.length > 10) { 
+                        let safePoint = getClosestSafeZone(nx, ny, 3);
+                        if (safePoint) { 
+                            isDrawing = false; player.x = safePoint.x; player.y = safePoint.y; 
+                            finalizeConquest(); return true; 
+                        }
                     }
 
                     if (target === 2) {
-                        // Verifica se sta incrociando la scia o se è solo l'ingombro del pennello spesso
                         let isRecent = trailPoints.some(p => Math.abs(p.x - nx) <= 2 && Math.abs(p.y - ny) <= 2 && trailPoints.indexOf(p) > trailPoints.length - 8);
                         if (!isRecent) { handleHit("Hai incrociato la tua stessa scia!"); return true; }
                     } else {
-                        // SCIA SPESSA 2 PIXEL
                         grid[ny][nx] = 2;
                         if(nx+1<WIDTH && grid[ny][nx+1]===0) grid[ny][nx+1]=2;
                         if(ny+1<HEIGHT && grid[ny+1][nx]===0) grid[ny+1][nx]=2;
-
-                        trailPoints.push({x: nx, y: ny});
-                        player.x = nx; player.y = ny;
+                        trailPoints.push({x: nx, y: ny}); player.x = nx; player.y = ny;
                     }
                 }
             }
@@ -531,26 +487,43 @@ HTML
         function updateGame() {
             if (isGameWon) return; pulseTime += 0.15;
             
-            // FISICA DI INSEGUIMENTO FLUIDO DEL GIOCATORE
-            if (isPlaying && isPointerDown && targetPos.x !== null) {
-                let dx = targetPos.x - currentPos.x; let dy = targetPos.y - currentPos.y;
-                let dist = Math.hypot(dx, dy);
-
-                if (dist > 1) {
-                    let moveDist = Math.min(playerSpeed, dist);
-                    let newX = currentPos.x + (dx / dist) * moveDist; let newY = currentPos.y + (dy / dist) * moveDist;
-
-                    let p0 = { x: Math.floor(currentPos.x), y: Math.floor(currentPos.y) };
-                    let p1 = { x: Math.floor(newX), y: Math.floor(newY) };
-
-                    let pts = getBresenhamPoints(p0.x, p0.y, p1.x, p1.y);
-                    for(let p of pts) { if (processPixel(p.x, p.y)) break; } // Calcola il tracciato pixel perfetto
-                    
-                    if (isPlaying) { currentPos.x = player.x; currentPos.y = player.y; } // Resincronizza
+            // 4. ESECUZIONE RIAVVOLGIMENTO ELASTICO
+            if (isPlaying && isRewinding) {
+                let rewindSpeed = 15; // Velocità di ritirata (pixel per frame)
+                for (let i = 0; i < rewindSpeed; i++) {
+                    if (trailPoints.length > 0) {
+                        let pt = trailPoints.pop();
+                        grid[pt.y][pt.x] = 0; 
+                        if(pt.x+1<WIDTH && grid[pt.y][pt.x+1]===2) grid[pt.y][pt.x+1]=0;
+                        if(pt.y+1<HEIGHT && grid[pt.y+1][pt.x]===2) grid[pt.y+1][pt.x]=0;
+                        
+                        if (trailPoints.length > 0) {
+                            let newHead = trailPoints[trailPoints.length - 1];
+                            player.x = newHead.x; player.y = newHead.y;
+                            currentPos.x = player.x; currentPos.y = player.y;
+                        } else {
+                            isRewinding = false; isDrawing = false; // Fine riavvolgimento, tornati salvi
+                            break;
+                        }
+                    }
                 }
             }
 
-            // FISICA NEMICI
+            // FISICA DI INSEGUIMENTO (Disabilitata durante il rewind)
+            if (isPlaying && isPointerDown && targetPos.x !== null && !isRewinding) {
+                let dx = targetPos.x - currentPos.x; let dy = targetPos.y - currentPos.y; let dist = Math.hypot(dx, dy);
+                if (dist > 1) {
+                    let moveDist = Math.min(playerSpeed, dist);
+                    let newX = currentPos.x + (dx / dist) * moveDist; let newY = currentPos.y + (dy / dist) * moveDist;
+                    let p0 = { x: Math.floor(currentPos.x), y: Math.floor(currentPos.y) };
+                    let p1 = { x: Math.floor(newX), y: Math.floor(newY) };
+                    let pts = getBresenhamPoints(p0.x, p0.y, p1.x, p1.y);
+                    for(let p of pts) { if (processPixel(p.x, p.y)) break; } 
+                    if (isPlaying) { currentPos.x = player.x; currentPos.y = player.y; } 
+                }
+            }
+
+            // FISICA NEMICI (Attiva anche durante il rewind!)
             if (isPlaying) {
                 for(let s of spheres) {
                     let r = s.radius; let hitTrail = false; let tolerance = 0.4; 
@@ -561,7 +534,7 @@ HTML
 
                     if (c1 < 0 || c2 >= WIDTH) { hitX = true; } 
                     else {
-                        for (let y = minY; y <= Math.min(maxY, HEIGHT-1); y++) {
+                        for (let y = Math.max(minY,0); y <= Math.min(maxY, HEIGHT-1); y++) {
                             for (let x = Math.max(c1,0); x <= Math.min(c2, WIDTH-1); x++) {
                                 if (grid[y][x] === 1) hitX = true; if (grid[y][x] === 2) hitTrail = true;
                             }
@@ -591,6 +564,16 @@ HTML
         }
 
         function finalizeConquest() {
+            // 3. SIGILLATURA STAGNA: Pennello spesso sull'impatto per evitare micro-buchi diagonali
+            for(let dy=-2; dy<=2; dy++) {
+                for(let dx=-2; dx<=2; dx++) {
+                    let cx = player.x + dx; let cy = player.y + dy;
+                    if(cx>=0 && cx<WIDTH && cy>=0 && cy<HEIGHT && grid[cy][cx] === 0) {
+                        grid[cy][cx] = 2; // Intonaco
+                    }
+                }
+            }
+
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 1; } }
             trailPoints = []; 
             let sphereCenters = spheres.map(s => ({ cx: Math.floor(s.x), cy: Math.floor(s.y) }));
@@ -631,7 +614,7 @@ HTML
         }
 
         function handleHit(msg) {
-            isPlaying = false; isPointerDown = false; targetPos.x = null; targetPos.y = null; isDrawing = false;
+            isPlaying = false; isPointerDown = false; isRewinding = false; targetPos.x = null; targetPos.y = null; isDrawing = false;
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 0; } }
             trailPoints = []; 
             if(challenge.tries !== Infinity) currentAttempts--;
@@ -649,8 +632,7 @@ HTML
                 clearInterval(gameInterval); isGameWon = true; isPlaying = false;
                 ctx.clearRect(0,0,WIDTH,HEIGHT);
                 ctx.drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, WIDTH, HEIGHT);
-                document.getElementById('gameHud').style.display = 'none';
-                document.getElementById('btnCloseWin').style.display = 'flex';
+                document.getElementById('gameHud').style.display = 'none'; document.getElementById('btnCloseWin').style.display = 'flex';
             }
         }
 
@@ -670,7 +652,6 @@ HTML
             if (isGameWon) return;
             let sData = screenImageData.data;
             
-            // RENDERING BASE E BORDI CIANO LUMINOSI (ESTETICA NEON SVELATA)
             for (let y = 0; y < HEIGHT; y++) {
                 for (let x = 0; x < WIDTH; x++) {
                     let i = (y * WIDTH + x) * 4; let val = grid[y][x];
@@ -679,18 +660,13 @@ HTML
                         if (y > 0 && grid[y-1][x] === 0) isEdge = true; else if (y < HEIGHT-1 && grid[y+1][x] === 0) isEdge = true;
                         else if (x > 0 && grid[y][x-1] === 0) isEdge = true; else if (x < WIDTH-1 && grid[y][x+1] === 0) isEdge = true;
 
-                        if (isEdge) { 
-                            // Bordi perimetrali Fluo
-                            sData[i]=0; sData[i+1]=240; sData[i+2]=255; sData[i+3]=255; 
+                        if (isEdge) { sData[i]=0; sData[i+1]=240; sData[i+2]=255; sData[i+3]=255; 
                         } else { sData[i]=colorPixels[i]; sData[i+1]=colorPixels[i+1]; sData[i+2]=colorPixels[i+2]; sData[i+3]=255; }
-                    } else { 
-                        sData[i]=bwPixels[i]; sData[i+1]=bwPixels[i+1]; sData[i+2]=bwPixels[i+2]; sData[i+3]=255; 
-                    }
+                    } else { sData[i]=bwPixels[i]; sData[i+1]=bwPixels[i+1]; sData[i+2]=bwPixels[i+2]; sData[i+3]=255; }
                 }
             }
             ctx.putImageData(screenImageData, 0, 0);
 
-            // SCIA NEON PULSANTE
             ctx.save();
             if (trailPoints.length > 0) {
                 let neonPulse = Math.abs(Math.sin(pulseTime));
@@ -704,23 +680,19 @@ HTML
             }
             ctx.restore();
 
-            // SFERE BIANCHE
             for(let s of spheres) {
                 ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
                 ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.closePath();
             }
 
-            // CURSORE LASER AD ALTA PRECISIONE
             ctx.save();
             let pulseRadius = 5 + Math.abs(Math.sin(pulseTime)) * 6; 
             ctx.beginPath(); ctx.arc(currentPos.x, currentPos.y, pulseRadius, 0, Math.PI * 2);
             ctx.shadowBlur = 25; ctx.shadowColor = '#00f0ff'; ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 3; ctx.stroke(); ctx.closePath();
-
             ctx.beginPath(); ctx.arc(currentPos.x, currentPos.y, 2, 0, Math.PI * 2);
             ctx.shadowBlur = 15; ctx.shadowColor = '#00f0ff'; ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.closePath();
             ctx.restore();
         }
-
     </script>
 </body>
 </html>
