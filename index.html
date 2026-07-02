@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>UNVEIL - Photo Challenge</title>
     <style>
         :root {
@@ -13,16 +13,16 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
-        /* 1. BLINDATURA VIEWPORT: Rimossa la centratura flessibile che causava l'offset */
-        body { 
-            position: fixed; top: 0; bottom: 0; left: 0; right: 0;
-            background-color: #000; overflow: hidden; margin: 0; touch-action: none;
+        /* FIX CHIRURGICO LAYOUT: Blocco totale dello scroll e dell'overflow su ogni livello */
+        body, html { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+            background-color: #000; overflow: hidden; margin: 0; padding: 0; touch-action: none;
+            -webkit-user-select: none; user-select: none;
         }
         
         .app-container {
-            width: 100vw; height: 100dvh; background: var(--bg-color);
-            display: flex; flex-direction: column; position: relative; overflow: hidden;
-            margin: 0 auto;
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh; 
+            background: var(--bg-color); display: flex; flex-direction: column; overflow: hidden;
         }
 
         #splashScreen {
@@ -96,13 +96,13 @@
         .share-container { display: none; margin-top: 10px; }
         .btn-share { background: var(--cyan); color: #000; border: none; padding: 20px; font-weight: 900; font-size: 16px; border-radius: 12px; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 10px 20px rgba(0, 240, 255, 0.2); display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-        /* HUD & GAME LAYOUT */
-        .game-hud { width: 100%; height: 50px; background: #000; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; font-weight: 800; z-index: 10; border-bottom: 1px solid #111; }
+        /* HUD & GAMEPLAY */
+        .game-hud { width: 100%; height: 50px; background: #000; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; font-weight: 800; z-index: 10; border-bottom: 1px solid #111; flex-shrink: 0; }
         .hud-btn-exit { background: none; border: 1px solid #333; color: #aaa; padding: 6px 12px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
         .hud-btn-exit:active { background: var(--red); color: white; border-color: var(--red); }
 
         .game-wrapper { flex: 1; background: #000; position: relative; display: flex; flex-direction: column; overflow: hidden; touch-action: none; }
-        #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; z-index: 2; position: relative; }
+        #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; z-index: 2; position: absolute; top:0; left:0; }
         
         .vignette-overlay { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 5; background: radial-gradient(circle at center, transparent 50%, rgba(0, 240, 255, 0.15) 100%); }
 
@@ -132,7 +132,6 @@
     <div class="app-container">
         <div id="appBg" class="app-bg"></div>
 
-        <!-- REGIA -->
         <div id="screenRegia" class="screen active">
             <div id="mainHeader" class="header">
                 <div class="brand-zone">
@@ -201,7 +200,6 @@
             </div>
         </div>
 
-        <!-- GAMEPLAY -->
         <div id="screenGame" class="screen">
             <div class="game-hud" id="gameHud">
                 <button class="hud-btn-exit" onclick="resetToHome()">✕ ESCI</button>
@@ -223,11 +221,11 @@
                         </li>
                         <li>
                             <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--cyan)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                            <span><b>Ritorna alle aree svelate</b> per chiudere i circuiti neon. Se alzi il dito, la scia si riavvolgerà!</span>
+                            <span><b>Aggancio Magnetico Attivo:</b> Avvicinati a una zona sicura o ai bordi per far scattare la chiusura immediata automatica!</span>
                         </li>
                         <li>
                             <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--red)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                            <span><b>Evita le sfere!</b> Se toccano la tua scia (anche mentre si riavvolge), perdi una vita.</span>
+                            <span><b>Rilascio = Riavvolgimento:</b> Alzando il dito in mezzo allo schermo la scia si riavvolgerà elasticamente a ritroso. Evita le sfere!</span>
                         </li>
                     </ul>
                     <button class="btn-submit" style="width: 100%; margin-top: 10px;" onclick="startGameplay()">Inizia a Giocare</button>
@@ -263,7 +261,6 @@
             const file = input.files[0];
             const errorEl = document.getElementById('uploadError');
             if (!file) return;
-
             const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
             if (!validTypes.includes(file.type)) { errorEl.innerText = "Formato non valido."; errorEl.style.display = 'block'; return; }
             if (file.size > 8388608) { errorEl.innerText = "Massimo 8 MB."; errorEl.style.display = 'block'; return; }
@@ -311,7 +308,7 @@
             } catch (error) { alert("Errore di rete."); btn.innerHTML = originalText; btn.disabled = false; }
         }
 
-        // --- MOTORE DI GIOCO ---
+        // --- ENGINE DI GIOCO ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
@@ -324,8 +321,8 @@
         let currentPos = { x: 0, y: 0 }; 
         let targetPos = { x: null, y: null }; 
         let isPointerDown = false;
-        let playerSpeed = 3.5; 
-        let isRewinding = false; // 4. STATO RIAVVOLGIMENTO ELASTICO
+        let playerSpeed = 4.2; 
+        let isRewinding = false; 
         
         let cropData = { x: 0, y: 0, w: 0, h: 0 };
         let colorPixels = null, bwPixels = null, screenImageData = null;
@@ -356,52 +353,48 @@
         }
 
         function startGameplay() {
-            const elem = document.documentElement;
-            const finalizeStart = () => {
-                setTimeout(() => {
-                    const wrapper = document.getElementById('gameWrapper');
-                    WIDTH = wrapper.clientWidth; HEIGHT = wrapper.clientHeight;
-                    canvas.width = WIDTH; canvas.height = HEIGHT;
+            const wrapper = document.getElementById('gameWrapper');
+            
+            // BOUNDING RECT CHIRURGICO: Assicura l'assenza totale di scroll o disallineamento pixel su mobile
+            const rect = wrapper.getBoundingClientRect();
+            WIDTH = Math.floor(rect.width); HEIGHT = Math.floor(rect.height);
+            canvas.width = WIDTH; canvas.height = HEIGHT;
 
-                    let imgRatio = loadedImage.width / loadedImage.height; let canvasRatio = WIDTH / HEIGHT;
-                    cropData = { x: 0, y: 0, w: loadedImage.width, h: loadedImage.height };
-                    if (imgRatio > canvasRatio) { cropData.w = Math.floor(loadedImage.height * canvasRatio); cropData.x = Math.floor((loadedImage.width - cropData.w) / 2); } 
-                    else { cropData.h = Math.floor(loadedImage.width / canvasRatio); cropData.y = Math.floor((loadedImage.height - cropData.h) / 2); }
+            let imgRatio = loadedImage.width / loadedImage.height; let canvasRatio = WIDTH / HEIGHT;
+            cropData = { x: 0, y: 0, w: loadedImage.width, h: loadedImage.height };
+            if (imgRatio > canvasRatio) { cropData.w = Math.floor(loadedImage.height * canvasRatio); cropData.x = Math.floor((loadedImage.width - cropData.w) / 2); } 
+            else { cropData.h = Math.floor(loadedImage.width / canvasRatio); cropData.y = Math.floor((loadedImage.height - cropData.h) / 2); }
 
-                    grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
-                    for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; } }
-                    
-                    player.x = Math.floor(WIDTH / 2); player.y = HEIGHT - 1;
-                    currentPos.x = player.x; currentPos.y = player.y;
+            grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
+            for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; } }
+            
+            player.x = Math.floor(WIDTH / 2); player.y = HEIGHT - 1;
+            currentPos.x = player.x; currentPos.y = player.y;
 
-                    let tempCanvas = document.createElement('canvas'); tempCanvas.width = 60; tempCanvas.height = Math.floor(60 / canvasRatio);
-                    tempCanvas.getContext('2d').drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, tempCanvas.width, tempCanvas.height);
-                    let colorCanvas = document.createElement('canvas'); colorCanvas.width = WIDTH; colorCanvas.height = HEIGHT;
-                    let cCtx = colorCanvas.getContext('2d'); cCtx.imageSmoothingEnabled = false;
-                    cCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, WIDTH, HEIGHT);
-                    colorPixels = cCtx.getImageData(0, 0, WIDTH, HEIGHT).data;
+            let tempCanvas = document.createElement('canvas'); tempCanvas.width = 60; tempCanvas.height = Math.floor(60 / canvasRatio);
+            tempCanvas.getContext('2d').drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, tempCanvas.width, tempCanvas.height);
+            let colorCanvas = document.createElement('canvas'); colorCanvas.width = WIDTH; colorCanvas.height = HEIGHT;
+            let cCtx = colorCanvas.getContext('2d'); cCtx.imageSmoothingEnabled = false;
+            cCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, WIDTH, HEIGHT);
+            colorPixels = cCtx.getImageData(0, 0, WIDTH, HEIGHT).data;
 
-                    bwPixels = new Uint8ClampedArray(colorPixels.length);
-                    for(let i=0; i<colorPixels.length; i+=4) {
-                        let r = colorPixels[i], g = colorPixels[i+1], b = colorPixels[i+2], a = colorPixels[i+3];
-                        let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                        bwPixels[i] = gray * 0.75; bwPixels[i+1] = gray * 0.75; bwPixels[i+2] = gray * 0.75; bwPixels[i+3] = a; 
-                    }
+            bwPixels = new Uint8ClampedArray(colorPixels.length);
+            for(let i=0; i<colorPixels.length; i+=4) {
+                let r = colorPixels[i], g = colorPixels[i+1], b = colorPixels[i+2], a = colorPixels[i+3];
+                let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                bwPixels[i] = gray * 0.75; bwPixels[i+1] = gray * 0.75; bwPixels[i+2] = gray * 0.75; bwPixels[i+3] = a; 
+            }
 
-                    screenImageData = new ImageData(WIDTH, HEIGHT); spheres = [];
-                    let sSpeed = 1.0 + (challenge.diff * 0.4);
-                    for(let i=0; i<challenge.diff; i++) { spheres.push({ x: WIDTH / 2, y: HEIGHT / 2, vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed, vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed, radius: 6 }); }
+            screenImageData = new ImageData(WIDTH, HEIGHT); spheres = [];
+            let sSpeed = 1.0 + (challenge.diff * 0.4);
+            for(let i=0; i<challenge.diff; i++) { spheres.push({ x: WIDTH / 2, y: HEIGHT / 2, vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed, vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed, radius: 6 }); }
 
-                    setupFluidControls();
-                    if(gameInterval) clearInterval(gameInterval);
-                    gameInterval = setInterval(updateGame, 1000 / 60);
+            setupFluidControls();
+            if(gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(updateGame, 1000 / 60);
 
-                    document.getElementById('tutorialOverlay').style.display = 'none';
-                    isPlaying = true; trailPoints = [];
-                }, 300);
-            };
-            if (elem.requestFullscreen) { elem.requestFullscreen().then(finalizeStart).catch(finalizeStart); } 
-            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); finalizeStart(); } else { finalizeStart(); }
+            document.getElementById('tutorialOverlay').style.display = 'none';
+            isPlaying = true; trailPoints = [];
         }
 
         function setupFluidControls() {
@@ -417,10 +410,9 @@
             });
             canvas.addEventListener('pointermove', (e) => { e.preventDefault(); if (isPointerDown) updateTarget(e); });
             
-            // 4. TRIGGER RIAVVOLGIMENTO AL RILASCIO DEL DITO
             const handlePointerUp = () => {
                 isPointerDown = false; targetPos.x = null; targetPos.y = null;
-                if (isDrawing && !isRewinding) { isRewinding = true; } // Avvia il rewind se stai tagliando
+                if (isDrawing && !isRewinding) { isRewinding = true; } 
             };
             canvas.addEventListener('pointerup', handlePointerUp);
             canvas.addEventListener('pointercancel', handlePointerUp);
@@ -436,17 +428,20 @@
             return pts;
         }
 
-        // 2. FUNZIONE DI AUTO-SNAP MAGNETICO
-        function getClosestSafeZone(x, y, radius) {
-            for(let r=1; r<=radius; r++) {
-                for(let dy=-r; dy<=r; dy++) {
-                    for(let dx=-r; dx<=r; dx++) {
-                        let cx = x+dx, cy = y+dy;
-                        if(cx>=0 && cx<WIDTH && cy>=0 && cy<HEIGHT && grid[cy][cx]===1) return {x: cx, y: cy};
+        // GAP FILL: Intonacatura di giunzione ultra-solida 7x7 per sigillare il tracciato
+        function applyGapFill(startX, startY, endX, endY) {
+            let pts = getBresenhamPoints(startX, startY, endX, endY);
+            for(let p of pts) {
+                let br = 3; 
+                for(let dy=-br; dy<=br; dy++) {
+                    for(let dx=-br; dx<=br; dx++) {
+                        let cx = p.x + dx; let cy = p.y + dy;
+                        if(cx>=0 && cx<WIDTH && cy>=0 && cy<HEIGHT) {
+                            if(grid[cy][cx] === 0) grid[cy][cx] = 2;
+                        }
                     }
                 }
             }
-            return null;
         }
 
         function processPixel(nx, ny) {
@@ -455,28 +450,25 @@
             let target = grid[ny][nx];
 
             if (target === 1) { 
-                if (isDrawing) { isDrawing = false; player.x = nx; player.y = ny; finalizeConquest(); return true; }
+                if (isDrawing) { isDrawing = false; applyGapFill(player.x, player.y, nx, ny); player.x = nx; player.y = ny; finalizeConquest(); return true; }
                 player.x = nx; player.y = ny;
-            } else if (target === 0 || target === 2) { 
+            } else { 
                 if (!isDrawing && target === 0) { isDrawing = true; trailPoints = []; }
                 if (isDrawing) {
-                    
-                    // 2. CONTROLLO AUTO-SNAP CONTINUO (Ampio raggio per evitare frustrazione)
-                    if (trailPoints.length > 10) { 
-                        let safePoint = getClosestSafeZone(nx, ny, 3);
-                        if (safePoint) { 
-                            isDrawing = false; player.x = safePoint.x; player.y = safePoint.y; 
-                            finalizeConquest(); return true; 
-                        }
-                    }
-
                     if (target === 2) {
-                        let isRecent = trailPoints.some(p => Math.abs(p.x - nx) <= 2 && Math.abs(p.y - ny) <= 2 && trailPoints.indexOf(p) > trailPoints.length - 8);
+                        let isRecent = trailPoints.some(p => Math.abs(p.x - nx) <= 4 && Math.abs(p.y - ny) <= 4 && trailPoints.indexOf(p) > trailPoints.length - 15);
                         if (!isRecent) { handleHit("Hai incrociato la tua stessa scia!"); return true; }
                     } else {
-                        grid[ny][nx] = 2;
-                        if(nx+1<WIDTH && grid[ny][nx+1]===0) grid[ny][nx+1]=2;
-                        if(ny+1<HEIGHT && grid[ny+1][nx]===0) grid[ny+1][nx]=2;
+                        // TIMBRO TIMING SOLIDO 3x3: Rende impossibile il tunneling e i buchi diagonali
+                        let br = 1;
+                        for(let dy=-br; dy<=br; dy++) {
+                            for(let dx=-br; dx<=br; dx++) {
+                                let cx = nx+dx; let cy = ny+dy;
+                                if(cx>=0 && cx<WIDTH && cy>=0 && cy<HEIGHT && grid[cy][cx]===0) {
+                                    grid[cy][cx] = 2;
+                                }
+                            }
+                        }
                         trailPoints.push({x: nx, y: ny}); player.x = nx; player.y = ny;
                     }
                 }
@@ -487,43 +479,87 @@
         function updateGame() {
             if (isGameWon) return; pulseTime += 0.15;
             
-            // 4. ESECUZIONE RIAVVOLGIMENTO ELASTICO
+            // GESTIONE REWIND ELASTICO SOLIDO
             if (isPlaying && isRewinding) {
-                let rewindSpeed = 15; // Velocità di ritirata (pixel per frame)
+                let rewindSpeed = 20; 
                 for (let i = 0; i < rewindSpeed; i++) {
                     if (trailPoints.length > 0) {
                         let pt = trailPoints.pop();
-                        grid[pt.y][pt.x] = 0; 
-                        if(pt.x+1<WIDTH && grid[pt.y][pt.x+1]===2) grid[pt.y][pt.x+1]=0;
-                        if(pt.y+1<HEIGHT && grid[pt.y+1][pt.x]===2) grid[pt.y+1][pt.x]=0;
-                        
+                        let br = 1;
+                        for(let dy=-br; dy<=br; dy++) {
+                            for(let dx=-br; dx<=br; dx++) {
+                                let cx = pt.x+dx; let cy = pt.y+dy;
+                                if(cx>=0 && cx<WIDTH && cy>=0 && cy<HEIGHT && grid[cy][cx]===2) grid[cy][cx] = 0;
+                            }
+                        }
                         if (trailPoints.length > 0) {
                             let newHead = trailPoints[trailPoints.length - 1];
                             player.x = newHead.x; player.y = newHead.y;
                             currentPos.x = player.x; currentPos.y = player.y;
                         } else {
-                            isRewinding = false; isDrawing = false; // Fine riavvolgimento, tornati salvi
-                            break;
+                            isRewinding = false; isDrawing = false; break;
                         }
                     }
                 }
             }
 
-            // FISICA DI INSEGUIMENTO (Disabilitata durante il rewind)
+            // TRAIETTORIA DI INSEGUIMENTO FLUIDA + GRAVITÀ VETTORIALE DEL COMANTO AGGRESSIVO
             if (isPlaying && isPointerDown && targetPos.x !== null && !isRewinding) {
                 let dx = targetPos.x - currentPos.x; let dy = targetPos.y - currentPos.y; let dist = Math.hypot(dx, dy);
                 if (dist > 1) {
                     let moveDist = Math.min(playerSpeed, dist);
                     let newX = currentPos.x + (dx / dist) * moveDist; let newY = currentPos.y + (dy / dist) * moveDist;
+
+                    // SNAP GRAVITAZIONALE STRUTTURALE (Soglia Massiccia 50px)
+                    if (isDrawing && trailPoints.length > 8) {
+                        let snapDist = 50; let forcedSnap = false;
+                        let snapX = Math.floor(newX); let snapY = Math.floor(newY);
+
+                        // 1. Forza aggancio geometrico perimetrale esterno
+                        if (snapX < snapDist) { snapX = 0; forcedSnap = true; } 
+                        else if (snapX > WIDTH - 1 - snapDist) { snapX = WIDTH - 1; forcedSnap = true; }
+                        if (snapY < snapDist) { snapY = 0; forcedSnap = true; } 
+                        else if (snapY > HEIGHT - 1 - snapDist) { snapY = HEIGHT - 1; forcedSnap = true; }
+
+                        // 2. Forza aggancio su aree interne (Scansione fitta senza omissioni)
+                        if (!forcedSnap) {
+                            let closestSafe = null; let minDist = snapDist;
+                            let intX = Math.floor(newX); let intY = Math.floor(newY);
+                            
+                            for (let sdy = -snapDist; sdy <= snapDist; sdy += 2) {
+                                for (let sdx = -snapDist; sdx <= snapDist; sdx += 2) {
+                                    let cx = intX + sdx; let cy = intY + sdy;
+                                    if (cx >= 0 && cx < WIDTH && cy >= 0 && cy < HEIGHT && grid[cy][cx] === 1) {
+                                        let d = Math.hypot(sdx, sdy);
+                                        if (d < minDist) {
+                                            let isTooCloseToStart = trailPoints.slice(0, 8).some(p => Math.abs(p.x - cx) <= 5 && Math.abs(p.y - cy) <= 5);
+                                            if (!isTooCloseToStart) { minDist = d; closestSafe = { x: cx, y: cy }; }
+                                        }
+                                    }
+                                }
+                            }
+                            if (closestSafe) { snapX = closestSafe.x; snapY = closestSafe.y; forcedSnap = true; }
+                        }
+
+                        if (forcedSnap) {
+                            isDrawing = false;
+                            applyGapFill(player.x, player.y, snapX, snapY);
+                            player.x = snapX; player.y = snapY; currentPos.x = snapX; currentPos.y = snapY;
+                            targetPos.x = null; targetPos.y = null; isPointerDown = false;
+                            finalizeConquest(); return;
+                        }
+                    }
+
                     let p0 = { x: Math.floor(currentPos.x), y: Math.floor(currentPos.y) };
                     let p1 = { x: Math.floor(newX), y: Math.floor(newY) };
                     let pts = getBresenhamPoints(p0.x, p0.y, p1.x, p1.y);
                     for(let p of pts) { if (processPixel(p.x, p.y)) break; } 
-                    if (isPlaying) { currentPos.x = player.x; currentPos.y = player.y; } 
+                    if (isPlaying && !isDrawing) { currentPos.x = player.x; currentPos.y = player.y; } 
+                    else if (isPlaying) { currentPos.x = newX; currentPos.y = newY; } 
                 }
             }
 
-            // FISICA NEMICI (Attiva anche durante il rewind!)
+            // FISICA DELLE SFERE NEMICHE
             if (isPlaying) {
                 for(let s of spheres) {
                     let r = s.radius; let hitTrail = false; let tolerance = 0.4; 
@@ -564,18 +600,26 @@
         }
 
         function finalizeConquest() {
-            // 3. SIGILLATURA STAGNA: Pennello spesso sull'impatto per evitare micro-buchi diagonali
-            for(let dy=-2; dy<=2; dy++) {
-                for(let dx=-2; dx<=2; dx++) {
-                    let cx = player.x + dx; let cy = player.y + dy;
-                    if(cx>=0 && cx<WIDTH && cy>=0 && cy<HEIGHT && grid[cy][cx] === 0) {
-                        grid[cy][cx] = 2; // Intonaco
+            // DILATAZIONE DI SICUREZZA PRE-FILL (Elimina qualsiasi micro-buco diagonale strutturale)
+            let tempGrid = Array(HEIGHT).fill().map(() => new Uint8Array(WIDTH));
+            for(let y=0; y<HEIGHT; y++) {
+                for(let x=0; x<WIDTH; x++) {
+                    if(grid[y][x] === 2) {
+                        for(let dy=-1; dy<=1; dy++) {
+                            for(let dx=-1; dx<=1; dx++) {
+                                let cx = x+dx; let cy = y+dy;
+                                if(cx>=0 && cx<WIDTH && cy>=0 && cy<HEIGHT) tempGrid[cy][cx] = 2;
+                            }
+                        }
                     }
                 }
             }
+            for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(tempGrid[y][x] === 2) grid[y][x] = 2; } }
 
+            // Consolidamento muri svelati
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 1; } }
             trailPoints = []; 
+
             let sphereCenters = spheres.map(s => ({ cx: Math.floor(s.x), cy: Math.floor(s.y) }));
             let fillMap = Array(HEIGHT).fill().map(() => new Uint8Array(WIDTH));
             let queue = [{x: player.x, y: player.y}]; fillMap[player.y][player.x] = 1; let head = 0;
@@ -671,7 +715,7 @@
             if (trailPoints.length > 0) {
                 let neonPulse = Math.abs(Math.sin(pulseTime));
                 ctx.beginPath();
-                for(let i=0; i<trailPoints.length; i++) { ctx.rect(trailPoints[i].x - 1, trailPoints[i].y - 1, 3, 3); }
+                for(let i=0; i<trailPoints.length; i++) { ctx.rect(trailPoints[i].x - 2, trailPoints[i].y - 2, 5, 5); }
                 ctx.shadowBlur = 15 + neonPulse * 15; ctx.shadowColor = '#00f0ff'; ctx.fillStyle = '#00f0ff'; ctx.fill();
                 
                 ctx.beginPath();
