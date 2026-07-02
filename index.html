@@ -13,14 +13,15 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
+        /* Layout Blindato */
         body, html { 
             position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
-            background-color: #000; overflow: hidden; margin: 0; padding: 0; touch-action: none;
-            -webkit-user-select: none; user-select: none;
+            background-color: #000; overflow: hidden; touch-action: none;
+            -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
         }
         
         .app-container {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: var(--bg-color); display: flex; flex-direction: column; overflow: hidden;
         }
 
@@ -95,27 +96,45 @@
         .share-container { display: none; margin-top: 10px; }
         .btn-share { background: var(--cyan); color: #000; border: none; padding: 20px; font-weight: 900; font-size: 16px; border-radius: 12px; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 10px 20px rgba(0, 240, 255, 0.2); display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-        /* HUD & GAMEPLAY */
-        .game-hud { width: 100%; height: 50px; background: #000; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; font-weight: 800; z-index: 10; border-bottom: 1px solid #111; flex-shrink: 0; }
+        /* HUD & GAMEPLAY - NUOVO SAFE BOX */
+        #screenGame { background: #000; align-items: center; justify-content: center; padding: 20px; }
+        
+        .game-box {
+            width: 100%; height: 100%; background: #000; border-radius: 20px;
+            overflow: hidden; display: flex; flex-direction: column; position: relative;
+            border: 1px solid #222; box-shadow: 0 0 20px rgba(0, 240, 255, 0.1); transition: box-shadow 0.2s ease-out;
+        }
+
+        .game-hud { 
+            width: 100%; height: 50px; background: #111; color: white; display: flex; 
+            justify-content: space-between; align-items: center; padding: 0 20px; 
+            font-size: 13px; font-weight: 800; z-index: 10; border-bottom: 1px solid #333; flex-shrink: 0; 
+        }
         .hud-btn-exit { background: none; border: 1px solid #333; color: #aaa; padding: 6px 12px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
         .hud-btn-exit:active { background: var(--red); color: white; border-color: var(--red); }
 
-        .game-wrapper { flex: 1; background: #000; position: relative; display: flex; flex-direction: column; overflow: hidden; touch-action: none; }
+        .game-wrapper { flex: 1; position: relative; overflow: hidden; touch-action: none; cursor: crosshair; }
         #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; z-index: 2; position: absolute; top:0; left:0; }
         
-        .vignette-overlay { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 5; background: radial-gradient(circle at center, transparent 50%, rgba(0, 240, 255, 0.15) 100%); }
+        .vignette-overlay { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 5; background: radial-gradient(circle at center, transparent 50%, rgba(0, 240, 255, 0.1) 100%); }
 
-        .btn-close-win { position: absolute; top: 15px; right: 20px; font-size: 24px; color: #000; background: var(--cyan); width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; z-index: 30; display: none; font-weight: bold; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
-        .btn-close-win:active { transform: scale(0.85); }
+        /* UI Toast Custom (Niente più Alert) */
+        .toast-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 30px; text-align: center;
+            z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(5px);
+        }
+        .toast-overlay.active { opacity: 1; pointer-events: all; }
+        .toast-title { font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; color: white; letter-spacing: -1px; }
+        .toast-title.error { color: var(--red); }
+        .toast-title.success { color: var(--cyan); }
+        .toast-desc { font-size: 14px; color: #ccc; font-weight: 600; margin-bottom: 30px; line-height: 1.5; }
+        .btn-toast { background: white; color: black; border: none; padding: 16px 32px; font-weight: 900; font-size: 14px; border-radius: 10px; cursor: pointer; text-transform: uppercase; width: 100%; max-width: 200px; }
+        .btn-toast.primary { background: var(--cyan); }
 
-        .game-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; background: rgba(0,0,0,0.95); }
-        .game-overlay.active { display: flex; }
-        .overlay-title { font-size: 36px; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; color: white; letter-spacing: -1px; }
-        .overlay-title.lose { color: var(--red); }
-        .btn-retry { background: white; color: black; border: none; padding: 16px 32px; font-weight: 900; font-size: 15px; border-radius: 10px; cursor: pointer; text-transform: uppercase; margin-top: 25px; }
-        
-        .tutorial-list { color: #ccc; text-align: left; margin: 30px 0; font-size: 15px; line-height: 1.6; list-style: none; padding: 0; font-weight: 600; width: 100%; }
-        .tutorial-list li { margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .tutorial-list { color: #ccc; text-align: left; margin-bottom: 30px; font-size: 14px; line-height: 1.6; list-style: none; padding: 0; font-weight: 600; width: 100%; max-width: 300px; }
+        .tutorial-list li { margin-bottom: 15px; display: flex; align-items: center; gap: 15px; }
         .tutorial-list svg { flex-shrink: 0; }
         .tutorial-list b { color: white; }
     </style>
@@ -200,40 +219,28 @@
         </div>
 
         <div id="screenGame" class="screen">
-            <div class="game-hud" id="gameHud">
-                <button class="hud-btn-exit" onclick="resetToHome()">✕ ESCI</button>
-                <span id="hudProgress">AREA: 0% / 80%</span>
-                <span id="hudAttempts">VITE: ∞</span>
-            </div>
-            
-            <div class="game-wrapper" id="gameWrapper">
-                <div class="vignette-overlay"></div>
-                <canvas id="gameCanvas"></canvas>
-                <button id="btnCloseWin" class="btn-close-win" style="display:none;" onclick="resetToHome()">✕</button>
-                
-                <div id="tutorialOverlay" class="game-overlay" style="z-index: 25;">
-                    <div class="overlay-title">Regole</div>
-                    <ul class="tutorial-list">
-                        <li>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l7-7 7 7"/><path d="M12 5v14"/></svg>
-                            <span><b>Insegui con il dito</b> per guidare fluidamente il laser neon.</span>
-                        </li>
-                        <li>
-                            <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--cyan)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                            <span><b>Scudo Magnetico Anti-Errore:</b> Ogni volta che parti da un bordo sei protetto. Allontanati di 40px per attivare i magneti di cattura!</span>
-                        </li>
-                        <li>
-                            <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--red)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                            <span><b>Rilascio = Riavvolgimento:</b> Alzando il dito la scia tornerà indietro elasticamente. Evita le sfere bianche!</span>
-                        </li>
-                    </ul>
-                    <button class="btn-submit" style="width: 100%; margin-top: 10px;" onclick="startGameplay()">Inizia a Giocare</button>
+            <div class="game-box" id="mainGameBox">
+                <div class="game-hud">
+                    <button class="hud-btn-exit" onclick="resetToHome()">✕ ESCI</button>
+                    <span id="hudProgress">AREA: 0% / 80%</span>
+                    <span id="hudAttempts">VITE: ∞</span>
                 </div>
-
-                <div id="gameOverlay" class="game-overlay">
-                    <div id="overlayTitle" class="overlay-title">Game Over</div>
-                    <div id="overlayDesc" style="font-size:15px; color:#aaa; font-weight: 600;">Tentativi esauriti.</div>
-                    <button id="overlayBtn" class="btn-retry" onclick="resetToHome()">Torna alla Home</button>
+                
+                <div class="game-wrapper" id="gameWrapper">
+                    <div class="vignette-overlay"></div>
+                    <canvas id="gameCanvas"></canvas>
+                    
+                    <div id="toastContainer" class="toast-overlay">
+                        <div id="toastTitle" class="toast-title">Titolo</div>
+                        <div id="toastDesc" class="toast-desc">Descrizione</div>
+                        <button id="toastBtn" class="btn-toast primary" onclick="handleToastAction()">Azione</button>
+                        
+                        <ul class="tutorial-list" id="tutorialRules" style="display:none;">
+                            <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l7-7 7 7"/><path d="M12 5v14"/></svg><span>Trascina per svelare l'immagine.</span></li>
+                            <li><svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--cyan)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Allontanati dal bordo per armare il laser.</span></li>
+                            <li><svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--red)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Evita le comete rosse. Il rilascio ti riavvolge.</span></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -287,7 +294,7 @@
         }
 
         async function generateChallengeLink() {
-            if(!challenge.imgBase64) { alert("Seleziona prima un'immagine!"); return; }
+            if(!challenge.imgBase64) { showToast("Errore", "Seleziona prima un'immagine!", "OK", "error", hideToast); return; }
             const btn = document.getElementById('btnSubmit'); const originalText = btn.innerHTML;
             btn.innerHTML = "Elaborazione..."; btn.disabled = true;
             challenge.auto = document.getElementById('autodistruzioneToggle').checked;
@@ -303,13 +310,14 @@
                     const baseUrl = window.location.href.split('?')[0];
                     finalShareUrl = `${baseUrl}?d=${challenge.diff}&t=${challenge.tries}&a=${challenge.auto ? 1 : 0}&img=${encodeURIComponent(shortImgUrl)}`;
                     btn.style.display = 'none'; document.getElementById('shareContainer').style.display = 'block';
-                } else { alert("Errore ImgBB: " + data.error.message); btn.innerHTML = originalText; btn.disabled = false; }
-            } catch (error) { alert("Errore di rete."); btn.innerHTML = originalText; btn.disabled = false; }
+                } else { showToast("Errore ImgBB", data.error.message, "Riprova", "error", hideToast); btn.innerHTML = originalText; btn.disabled = false; }
+            } catch (error) { showToast("Errore Rete", "Controlla la connessione", "Riprova", "error", hideToast); btn.innerHTML = originalText; btn.disabled = false; }
         }
 
         // --- ENGINE DI GIOCO ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const gameBoxUI = document.getElementById('mainGameBox');
 
         let WIDTH = 0; let HEIGHT = 0;
         let grid = []; let spheres = [];
@@ -323,15 +331,30 @@
         let playerSpeed = 4.2; 
         let isRewinding = false; 
         
-        // 2. FISICA DELLE DISTANZE RICALIBRATA (DIMEZZATA SU TUO FEEDBACK)
+        // FISICA RICALIBRATA "SAFE-BOX"
         let isImmune = true; 
-        const IMMUNITY_THRESHOLD = 40; // Abbassata da 60 a 40
-        const SNAP_OUTER_BOUND = 25;   // Dimezzata da 50 a 25
-        const SNAP_INNER_WALL = 8;     // Chirurgico: dimezzato da 15 a 8
+        const IMMUNITY_THRESHOLD = 30; // Distanza per riarmo
+        const SNAP_WALL = 12;          // Snap bordi esterni
+        const SNAP_TRAIL = 6;          // Snap bordi interni
 
         let cropData = { x: 0, y: 0, w: 0, h: 0 };
         let colorPixels = null, bwPixels = null, screenImageData = null;
         let trailPoints = []; 
+        let currentToastAction = null;
+
+        // Gestione TOAST Custom
+        function showToast(title, desc, btnText, type, callback, isTutorial = false) {
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastTitle').className = `toast-title ${type}`;
+            document.getElementById('toastDesc').innerText = desc;
+            document.getElementById('toastDesc').style.display = desc ? 'block' : 'none';
+            document.getElementById('toastBtn').innerText = btnText;
+            document.getElementById('tutorialRules').style.display = isTutorial ? 'block' : 'none';
+            document.getElementById('toastContainer').classList.add('active');
+            currentToastAction = callback;
+        }
+        function hideToast() { document.getElementById('toastContainer').classList.remove('active'); }
+        function handleToastAction() { if(currentToastAction) currentToastAction(); else hideToast(); }
 
         function checkUrlAndRouting() {
             const params = new URLSearchParams(window.location.search);
@@ -351,64 +374,65 @@
             isDrawing = false; isGameWon = false; isPlaying = false; isRewinding = false; trailPoints = [];
             targetPos = { x: null, y: null }; isPointerDown = false; isImmune = true;
 
-            document.getElementById('gameHud').style.display = 'flex'; document.getElementById('btnCloseWin').style.display = 'none';
             document.getElementById('hudProgress').innerText = `AREA: 0% / ${targetPercentage}%`;
             document.getElementById('hudAttempts').innerText = `VITE: ${challenge.tries === Infinity ? '∞' : currentAttempts}`;
-            document.getElementById('gameOverlay').classList.remove('active'); document.getElementById('tutorialOverlay').style.display = 'flex';
+            
+            showToast("UNVEIL", "", "Inizia a Giocare", "success", requestStartGameplay, true);
         }
 
-        // 1. BLINDATURA RIPRISTINATA: Il gioco richiede il fullscreen reale, azzerando le gesture mobile
-        function startGameplay() {
+        function requestStartGameplay() {
+            hideToast();
             const elem = document.documentElement;
-            
-            const finalizeStart = () => {
-                setTimeout(() => {
-                    const wrapper = document.getElementById('gameWrapper');
-                    const rect = wrapper.getBoundingClientRect();
-                    WIDTH = Math.floor(rect.width); HEIGHT = Math.floor(rect.height);
-                    canvas.width = WIDTH; canvas.height = HEIGHT;
+            if (elem.requestFullscreen) { elem.requestFullscreen().then(setupGameCanvas).catch(setupGameCanvas); } 
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); setupGameCanvas(); } 
+            else { setupGameCanvas(); }
+        }
 
-                    let imgRatio = loadedImage.width / loadedImage.height; let canvasRatio = WIDTH / HEIGHT;
-                    cropData = { x: 0, y: 0, w: loadedImage.width, h: loadedImage.height };
-                    if (imgRatio > canvasRatio) { cropData.w = Math.floor(loadedImage.height * canvasRatio); cropData.x = Math.floor((loadedImage.width - cropData.w) / 2); } 
-                    else { cropData.h = Math.floor(loadedImage.width / canvasRatio); cropData.y = Math.floor((loadedImage.height - cropData.h) / 2); }
+        function setupGameCanvas() {
+            setTimeout(() => {
+                const wrapper = document.getElementById('gameWrapper');
+                const rect = wrapper.getBoundingClientRect();
+                WIDTH = Math.floor(rect.width); HEIGHT = Math.floor(rect.height);
+                canvas.width = WIDTH; canvas.height = HEIGHT;
 
-                    grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
-                    for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; } }
-                    
-                    player.x = Math.floor(WIDTH / 2); player.y = HEIGHT - 1;
-                    currentPos.x = player.x; currentPos.y = player.y;
+                let imgRatio = loadedImage.width / loadedImage.height; let canvasRatio = WIDTH / HEIGHT;
+                cropData = { x: 0, y: 0, w: loadedImage.width, h: loadedImage.height };
+                if (imgRatio > canvasRatio) { cropData.w = Math.floor(loadedImage.height * canvasRatio); cropData.x = Math.floor((loadedImage.width - cropData.w) / 2); } 
+                else { cropData.h = Math.floor(loadedImage.width / canvasRatio); cropData.y = Math.floor((loadedImage.height - cropData.h) / 2); }
 
-                    let tempCanvas = document.createElement('canvas'); tempCanvas.width = 60; tempCanvas.height = Math.floor(60 / canvasRatio);
-                    tempCanvas.getContext('2d').drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, tempCanvas.width, tempCanvas.height);
-                    let colorCanvas = document.createElement('canvas'); colorCanvas.width = WIDTH; colorCanvas.height = HEIGHT;
-                    let cCtx = colorCanvas.getContext('2d'); cCtx.imageSmoothingEnabled = false;
-                    cCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, WIDTH, HEIGHT);
-                    colorPixels = cCtx.getImageData(0, 0, WIDTH, HEIGHT).data;
+                grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
+                for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; } }
+                
+                // Partenza al centro del box visibile
+                player.x = Math.floor(WIDTH / 2); player.y = HEIGHT - 1;
+                currentPos.x = player.x; currentPos.y = player.y;
 
-                    bwPixels = new Uint8ClampedArray(colorPixels.length);
-                    for(let i=0; i<colorPixels.length; i+=4) {
-                        let r = colorPixels[i], g = colorPixels[i+1], b = colorPixels[i+2], a = colorPixels[i+3];
-                        let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                        bwPixels[i] = gray * 0.75; bwPixels[i+1] = gray * 0.75; bwPixels[i+2] = gray * 0.75; bwPixels[i+3] = a; 
-                    }
+                let tempCanvas = document.createElement('canvas'); tempCanvas.width = 60; tempCanvas.height = Math.floor(60 / canvasRatio);
+                tempCanvas.getContext('2d').drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, tempCanvas.width, tempCanvas.height);
+                let colorCanvas = document.createElement('canvas'); colorCanvas.width = WIDTH; colorCanvas.height = HEIGHT;
+                let cCtx = colorCanvas.getContext('2d'); cCtx.imageSmoothingEnabled = false;
+                cCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, WIDTH, HEIGHT);
+                colorPixels = cCtx.getImageData(0, 0, WIDTH, HEIGHT).data;
 
-                    screenImageData = new ImageData(WIDTH, HEIGHT); spheres = [];
-                    let sSpeed = 1.0 + (challenge.diff * 0.4);
-                    for(let i=0; i<challenge.diff; i++) { spheres.push({ x: WIDTH / 2, y: HEIGHT / 2, vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed, vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed, radius: 6 }); }
+                bwPixels = new Uint8ClampedArray(colorPixels.length);
+                for(let i=0; i<colorPixels.length; i+=4) {
+                    let r = colorPixels[i], g = colorPixels[i+1], b = colorPixels[i+2], a = colorPixels[i+3];
+                    let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                    bwPixels[i] = gray * 0.75; bwPixels[i+1] = gray * 0.75; bwPixels[i+2] = gray * 0.75; bwPixels[i+3] = a; 
+                }
 
-                    setupFluidControls();
-                    if(gameInterval) clearInterval(gameInterval);
-                    gameInterval = setInterval(updateGame, 1000 / 60);
+                screenImageData = new ImageData(WIDTH, HEIGHT); spheres = [];
+                let sSpeed = 1.0 + (challenge.diff * 0.4);
+                for(let i=0; i<challenge.diff; i++) { 
+                    spheres.push({ x: WIDTH / 2, y: HEIGHT / 2, vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed, vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed, radius: 6, history: [] }); 
+                }
 
-                    document.getElementById('tutorialOverlay').style.display = 'none';
-                    isPlaying = true; trailPoints = []; isImmune = true; 
-                }, 300);
-            };
+                setupFluidControls();
+                if(gameInterval) clearInterval(gameInterval);
+                gameInterval = setInterval(updateGame, 1000 / 60);
 
-            if (elem.requestFullscreen) { elem.requestFullscreen().then(finalizeStart).catch(finalizeStart); } 
-            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); finalizeStart(); } 
-            else { finalizeStart(); }
+                isPlaying = true; trailPoints = []; isImmune = true; 
+            }, 300); // Timeout per permettere ricalcolo UI post-fullscreen
         }
 
         function setupFluidControls() {
@@ -463,22 +487,26 @@
             let target = grid[ny][nx];
 
             if (target === 1) { 
-                if (isDrawing) { isDrawing = false; applyGapFill(player.x, player.y, nx, ny); player.x = nx; player.y = ny; finalizeConquest(); return true; }
+                if (isDrawing) { 
+                    // FILTRO ANTI-TREMOLIO
+                    if (trailPoints.length < 15) {
+                        isDrawing = false; trailPoints = []; player.x = nx; player.y = ny; return true;
+                    }
+                    isDrawing = false; applyGapFill(player.x, player.y, nx, ny); player.x = nx; player.y = ny; finalizeConquest(); return true; 
+                }
                 player.x = nx; player.y = ny;
             } else { 
                 if (!isDrawing && target === 0) { isDrawing = true; trailPoints = []; }
                 if (isDrawing) {
                     if (target === 2) {
                         let isRecent = trailPoints.some(p => Math.abs(p.x - nx) <= 4 && Math.abs(p.y - ny) <= 4 && trailPoints.indexOf(p) > trailPoints.length - 15);
-                        if (!isRecent) { handleHit("Hai incrociato la tua stessa scia!"); return true; }
+                        if (!isRecent) { handleHit("Incrocio scia fatale"); return true; }
                     } else {
                         let br = 1;
                         for(let dy=-br; dy<=br; dy++) {
                             for(let dx=-br; dx<=br; dx++) {
                                 let cx = nx+dx; let cy = ny+dy;
-                                if(cx>=0 && cx<WIDTH && cy>=0 && cy<HEIGHT && grid[cy][cx]===0) {
-                                    grid[cy][cx] = 2;
-                                }
+                                if(cx>=0 && cx<WIDTH && cy>=0 && cy<HEIGHT && grid[cy][cx]===0) { grid[cy][cx] = 2; }
                             }
                         }
                         trailPoints.push({x: nx, y: ny}); player.x = nx; player.y = ny;
@@ -497,8 +525,8 @@
                 for (let dx = -IMMUNITY_THRESHOLD; dx <= IMMUNITY_THRESHOLD; dx += step) {
                     let testX = Math.floor(cx + dx); let testY = Math.floor(cy + dy);
                     if (testX >= 0 && testX < WIDTH && testY >= 0 && testY < HEIGHT) {
-                        if (grid[testY][testX] === 1) {
-                            if (Math.hypot(dx, dy) < IMMUNITY_THRESHOLD) { isNearSafeElement = true; break; }
+                        if (grid[testY][testX] === 1 && Math.hypot(dx, dy) < IMMUNITY_THRESHOLD) { 
+                            isNearSafeElement = true; break; 
                         }
                     }
                 }
@@ -510,8 +538,10 @@
         function updateGame() {
             if (isGameWon) return; pulseTime += 0.15;
             
+            let currentSpeed = 0;
+
             if (isPlaying && isRewinding) {
-                let rewindSpeed = 20; 
+                let rewindSpeed = 20; currentSpeed = rewindSpeed;
                 for (let i = 0; i < rewindSpeed; i++) {
                     if (trailPoints.length > 0) {
                         let pt = trailPoints.pop();
@@ -524,8 +554,7 @@
                         }
                         if (trailPoints.length > 0) {
                             let newHead = trailPoints[trailPoints.length - 1];
-                            player.x = newHead.x; player.y = newHead.y;
-                            currentPos.x = player.x; currentPos.y = player.y;
+                            player.x = newHead.x; player.y = newHead.y; currentPos.x = player.x; currentPos.y = player.y;
                         } else {
                             isRewinding = false; isDrawing = false; isImmune = true; break;
                         }
@@ -537,33 +566,32 @@
                 let dx = targetPos.x - currentPos.x; let dy = targetPos.y - currentPos.y; let dist = Math.hypot(dx, dy);
                 if (dist > 1) {
                     let moveDist = Math.min(playerSpeed, dist);
+                    currentSpeed = moveDist;
                     let newX = currentPos.x + (dx / dist) * moveDist; let newY = currentPos.y + (dy / dist) * moveDist;
 
                     if (isImmune) { checkImmunityDeactivation(newX, newY); }
 
-                    // SNAP GRAVITAZIONALE LIVE STRUTTURALE (Ricalibrato a metà raggio)
-                    if (!isImmune && isDrawing && trailPoints.length > 8) {
+                    // SNAP CHIRURGICO
+                    if (!isImmune && isDrawing && trailPoints.length > 15) {
                         let forcedSnap = false;
                         let snapX = Math.floor(newX); let snapY = Math.floor(newY);
 
-                        // 1. SNAP PERIMETRALE ESTERNO (Tolleranza ottimizzata a 25px)
-                        if (snapX < SNAP_OUTER_BOUND) { snapX = 0; forcedSnap = true; } 
-                        else if (snapX > WIDTH - 1 - SNAP_OUTER_BOUND) { snapX = WIDTH - 1; forcedSnap = true; }
-                        if (snapY < SNAP_OUTER_BOUND) { snapY = 0; forcedSnap = true; } 
-                        else if (snapY > HEIGHT - 1 - SNAP_OUTER_BOUND) { snapY = HEIGHT - 1; forcedSnap = true; }
+                        if (snapX < SNAP_WALL) { snapX = 0; forcedSnap = true; } 
+                        else if (snapX > WIDTH - 1 - SNAP_WALL) { snapX = WIDTH - 1; forcedSnap = true; }
+                        if (snapY < SNAP_WALL) { snapY = 0; forcedSnap = true; } 
+                        else if (snapY > HEIGHT - 1 - SNAP_WALL) { snapY = HEIGHT - 1; forcedSnap = true; }
 
-                        // 2. SNAP DELLE LINEE INTERNE (Chirurgico a 8px)
                         if (!forcedSnap) {
-                            let closestSafe = null; let minDist = SNAP_INNER_WALL;
+                            let closestSafe = null; let minDist = SNAP_TRAIL;
                             let intX = Math.floor(newX); let intY = Math.floor(newY);
                             
-                            for (let sdy = -SNAP_INNER_WALL; sdy <= SNAP_INNER_WALL; sdy++) {
-                                for (let sdx = -SNAP_INNER_WALL; sdx <= SNAP_INNER_WALL; sdx++) {
+                            for (let sdy = -SNAP_TRAIL; sdy <= SNAP_TRAIL; sdy++) {
+                                for (let sdx = -SNAP_TRAIL; sdx <= SNAP_TRAIL; sdx++) {
                                     let cx = intX + sdx; let cy = intY + sdy;
                                     if (cx >= 0 && cx < WIDTH && cy >= 0 && cy < HEIGHT && grid[cy][cx] === 1) {
                                         let d = Math.hypot(sdx, sdy);
                                         if (d < minDist) {
-                                            let isTooCloseToStart = trailPoints.slice(0, 8).some(p => Math.abs(p.x - cx) <= 5 && Math.abs(p.y - cy) <= 5);
+                                            let isTooCloseToStart = trailPoints.slice(0, 15).some(p => Math.abs(p.x - cx) <= 5 && Math.abs(p.y - cy) <= 5);
                                             if (!isTooCloseToStart) { minDist = d; closestSafe = { x: cx, y: cy }; }
                                         }
                                     }
@@ -573,8 +601,7 @@
                         }
 
                         if (forcedSnap) {
-                            isDrawing = false;
-                            applyGapFill(player.x, player.y, snapX, snapY);
+                            isDrawing = false; applyGapFill(player.x, player.y, snapX, snapY);
                             player.x = snapX; player.y = snapY; currentPos.x = snapX; currentPos.y = snapY;
                             targetPos.x = null; targetPos.y = null; isPointerDown = false;
                             finalizeConquest(); return;
@@ -590,8 +617,18 @@
                 }
             }
 
+            // GESTIONE GLOW REATTIVO SUL BOX
+            let baseGlow = isImmune ? 10 : 25;
+            let dynamicGlow = isImmune ? (Math.sin(pulseTime * 0.5) * 5) : (currentSpeed * 4 + Math.sin(pulseTime) * 10);
+            let glowTotal = Math.max(10, baseGlow + dynamicGlow);
+            gameBoxUI.style.boxShadow = `0 0 ${glowTotal}px rgba(0, 240, 255, ${isImmune ? 0.2 : 0.4})`;
+
             if (isPlaying) {
                 for(let s of spheres) {
+                    // Update scia nemiche
+                    s.history.push({x: s.x, y: s.y});
+                    if (s.history.length > 15) s.history.shift();
+
                     let r = s.radius; let hitTrail = false; let tolerance = 0.4; 
                     let oldX = s.x; s.x += s.vx; let hitX = false;
                     let minY = Math.floor(s.y - r * tolerance); let maxY = Math.floor(s.y + r * tolerance);
@@ -606,7 +643,7 @@
                             }
                         }
                     }
-                    if (hitTrail) { handleHit("Una sfera ha colpito la scia neon!"); return; }
+                    if (hitTrail) { handleHit("Folgore Rossa"); return; }
                     if (hitX) { s.x = oldX; s.vx *= -1; }
 
                     let oldY = s.y; s.y += s.vy; let hitY = false;
@@ -622,7 +659,7 @@
                             }
                         }
                     }
-                    if (hitTrail) { handleHit("Una sfera ha colpito la scia neon!"); return; }
+                    if (hitTrail) { handleHit("Folgore Rossa"); return; }
                     if (hitY) { s.y = oldY; s.vy *= -1; }
                 }
             }
@@ -683,6 +720,8 @@
             }
             for (let comp of components) { if (!comp.hasSphere) { for (let dIdx of comp.cells) { grid[Math.floor(dIdx / WIDTH)][dIdx % WIDTH] = 1; } } }
             
+            // Flash Neon Effetto Completamento
+            gameBoxUI.style.boxShadow = `0 0 50px rgba(0, 240, 255, 1)`;
             isImmune = true; 
             checkWin();
         }
@@ -691,9 +730,14 @@
             isPlaying = false; isPointerDown = false; isRewinding = false; targetPos.x = null; targetPos.y = null; isDrawing = false;
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 0; } }
             trailPoints = []; isImmune = true; 
+            gameBoxUI.style.boxShadow = `0 0 50px rgba(255, 0, 85, 1)`; // Flash Rosso Danno
+            
             if(challenge.tries !== Infinity) currentAttempts--;
-            if(currentAttempts <= 0 && challenge.tries !== Infinity) { showOverlay("Game Over", "Tentativi esauriti.", "lose");
-            } else { alert(msg || "La scia è stata colpita!"); initGameData(); isPlaying = true; }
+            if(currentAttempts <= 0 && challenge.tries !== Infinity) { 
+                showToast("Game Over", "Segnale perso. Tentativi esauriti.", "Menu Principale", "error", resetToHome);
+            } else { 
+                showToast("Impatto", "La tua scia è stata interrotta.", "Riprova", "error", () => { hideToast(); initGameData(); isPlaying = true; }); 
+            }
         }
 
         function checkWin() {
@@ -706,13 +750,8 @@
                 clearInterval(gameInterval); isGameWon = true; isPlaying = false;
                 ctx.clearRect(0,0,WIDTH,HEIGHT);
                 ctx.drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, WIDTH, HEIGHT);
-                document.getElementById('gameHud').style.display = 'none'; document.getElementById('btnCloseWin').style.display = 'flex';
+                showToast("Svelata", "Immagine completamente decodificata.", "Menu Principale", "success", resetToHome);
             }
-        }
-
-        function showOverlay(title, desc, style) {
-            document.getElementById('overlayTitle').innerText = title; document.getElementById('overlayTitle').className = "overlay-title " + style;
-            document.getElementById('overlayDesc').innerText = desc; document.getElementById('gameOverlay').classList.add('active');
         }
 
         function resetToHome() { 
@@ -755,20 +794,29 @@
             ctx.restore();
 
             for(let s of spheres) {
+                ctx.save();
+                // Scia cometa rossa
+                ctx.beginPath();
+                for(let i=0; i<s.history.length; i++) {
+                    let pt = s.history[i]; let alpha = i / s.history.length;
+                    ctx.arc(pt.x, pt.y, s.radius * alpha * 0.8, 0, Math.PI*2);
+                    ctx.fillStyle = `rgba(255, 0, 85, ${alpha * 0.5})`; ctx.fill();
+                }
+                ctx.closePath();
+                // Sfera centrale
                 ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
+                ctx.shadowBlur = 15; ctx.shadowColor = '#ff0055';
                 ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.closePath();
+                ctx.restore();
             }
 
             ctx.save();
             let pulseRadius = 5 + Math.abs(Math.sin(pulseTime)) * 6; 
             ctx.beginPath(); ctx.arc(currentPos.x, currentPos.y, pulseRadius, 0, Math.PI * 2);
-            
-            // Feedback visivo: Rosso = protetto da immunità (sensori spenti), Ciano = vulnerabile in gioco (sensori caldi)
-            let indicatorColor = isImmune ? 'rgba(255, 0, 85, 0.8)' : '#00f0ff';
-            ctx.shadowBlur = 25; ctx.shadowColor = indicatorColor; ctx.strokeStyle = indicatorColor; ctx.lineWidth = 3; ctx.stroke(); ctx.closePath();
+            ctx.shadowBlur = 25; ctx.shadowColor = '#00f0ff'; ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 3; ctx.stroke(); ctx.closePath();
             
             ctx.beginPath(); ctx.arc(currentPos.x, currentPos.y, 2, 0, Math.PI * 2);
-            ctx.shadowBlur = 15; ctx.shadowColor = indicatorColor; ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.closePath();
+            ctx.shadowBlur = 15; ctx.shadowColor = '#00f0ff'; ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.closePath();
             ctx.restore();
         }
     </script>
