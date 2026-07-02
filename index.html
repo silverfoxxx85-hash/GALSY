@@ -96,40 +96,88 @@
         .share-container { display: none; margin-top: 10px; }
         .btn-share { background: var(--cyan); color: #000; border: none; padding: 20px; font-weight: 900; font-size: 16px; border-radius: 12px; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 10px 20px rgba(0, 240, 255, 0.2); display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-        /* HUD & GAMEPLAY - NUOVO SAFE BOX */
-        #screenGame { background: #000; align-items: center; justify-content: center; padding: 20px; }
-        
-        .game-box {
-            width: 100%; height: 100%; background: #000; border-radius: 20px;
-            overflow: hidden; display: flex; flex-direction: column; position: relative;
-            border: 1px solid #222; box-shadow: 0 0 20px rgba(0, 240, 255, 0.1); transition: box-shadow 0.2s ease-out;
-        }
 
+        /* ---------------------------------------------------- */
+        /* HUD & GAMEPLAY - NUOVA ARCHITETTURA SICURA (NOTCH/GLOW) */
+        /* ---------------------------------------------------- */
+        
+        #screenGame { background: #050505; }
+        
+        /* HUD Testuale posizionato sotto la fotocamera */
         .game-hud { 
-            width: 100%; height: 50px; background: #111; color: white; display: flex; 
-            justify-content: space-between; align-items: center; padding: 0 20px; 
-            font-size: 13px; font-weight: 800; z-index: 10; border-bottom: 1px solid #333; flex-shrink: 0; 
+            width: 100%; 
+            padding-top: max(20px, env(safe-area-inset-top)); 
+            padding-left: 20px; padding-right: 20px; padding-bottom: 10px;
+            background: transparent; color: white; display: flex; 
+            justify-content: space-between; align-items: center; 
+            font-size: 14px; font-weight: 800; z-index: 10; flex-shrink: 0; 
         }
-        .hud-btn-exit { background: none; border: 1px solid #333; color: #aaa; padding: 6px 12px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
-        .hud-btn-exit:active { background: var(--red); color: white; border-color: var(--red); }
-
-        .game-wrapper { flex: 1; position: relative; overflow: hidden; touch-action: none; cursor: crosshair; }
-        #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; z-index: 2; position: absolute; top:0; left:0; }
         
+        .hud-btn-exit { background: rgba(255,255,255,0.1); border: 1px solid #444; color: #fff; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
+        .hud-btn-exit:active { background: var(--red); color: white; border-color: var(--red); }
+        .hud-stats { display: flex; gap: 15px; }
+
+        /* Area del gioco centrale */
+        .game-area { 
+            flex: 1; padding: 10px 25px 30px 25px; 
+            position: relative; display: flex; justify-content: center; align-items: center; 
+        }
+
+        /* Contenitore per permettere al glow di espandersi senza clipping */
+        .game-box-wrapper {
+            width: 100%; height: 100%; position: relative;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15); /* Glow Applicato Qui */
+            transition: box-shadow 0.2s ease-out;
+        }
+
+        /* Il Canvas viene ritagliato qui dentro */
+        .game-box {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 20px; overflow: hidden; background: #000;
+            border: 2px solid var(--cyan); /* Bordo Perfetto CSS */
+            touch-action: none; cursor: crosshair;
+        }
+        
+        #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; z-index: 2; position: absolute; top:0; left:0; }
         .vignette-overlay { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 5; background: radial-gradient(circle at center, transparent 50%, rgba(0, 240, 255, 0.1) 100%); }
 
-        /* UI Toast Custom (Niente più Alert) */
+        /* Cursore Giocatore Svincolato come elemento HTML */
+        #playerCursor {
+            position: absolute;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: #fff; border: 2px solid var(--cyan);
+            box-shadow: 0 0 15px var(--cyan), 0 0 5px var(--cyan);
+            transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 50;
+            display: none; transition: transform 0.1s linear;
+        }
+
+        /* ---------------------------------------------------- */
+        /* UI TOAST (Banner e Messaggi) */
+        /* ---------------------------------------------------- */
         .toast-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
             justify-content: center; align-items: center; padding: 30px; text-align: center;
-            z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(5px);
+            z-index: 100; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(5px);
         }
         .toast-overlay.active { opacity: 1; pointer-events: all; }
+        
+        /* Stile alternativo per la vittoria (Banner fluttuante in basso) */
+        .toast-overlay.victory-banner {
+            top: auto; bottom: 40px; left: 20px; right: 20px; width: auto; height: auto;
+            background: rgba(0, 0, 0, 0.75); border: 1px solid var(--cyan);
+            border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            padding: 25px; transform: translateY(20px);
+        }
+        .toast-overlay.victory-banner.active { transform: translateY(0); }
+
         .toast-title { font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; color: white; letter-spacing: -1px; }
+        .victory-banner .toast-title { font-size: 24px; }
         .toast-title.error { color: var(--red); }
         .toast-title.success { color: var(--cyan); }
-        .toast-desc { font-size: 14px; color: #ccc; font-weight: 600; margin-bottom: 30px; line-height: 1.5; }
+        .toast-desc { font-size: 14px; color: #ccc; font-weight: 600; margin-bottom: 25px; line-height: 1.5; }
         .btn-toast { background: white; color: black; border: none; padding: 16px 32px; font-weight: 900; font-size: 14px; border-radius: 10px; cursor: pointer; text-transform: uppercase; width: 100%; max-width: 200px; }
         .btn-toast.primary { background: var(--cyan); }
 
@@ -150,6 +198,7 @@
     <div class="app-container">
         <div id="appBg" class="app-bg"></div>
 
+        <!-- SCHERMATA REGIA -->
         <div id="screenRegia" class="screen active">
             <div id="mainHeader" class="header">
                 <div class="brand-zone">
@@ -218,30 +267,40 @@
             </div>
         </div>
 
+        <!-- SCHERMATA GIOCO -->
         <div id="screenGame" class="screen">
-            <div class="game-box" id="mainGameBox">
-                <div class="game-hud">
-                    <button class="hud-btn-exit" onclick="resetToHome()">✕ ESCI</button>
-                    <span id="hudProgress">AREA: 0% / 80%</span>
+            <!-- HUD Spostato fuori dall'immagine -->
+            <div class="game-hud">
+                <button class="hud-btn-exit" onclick="resetToHome()">✕ ESCI</button>
+                <div class="hud-stats">
+                    <span id="hudProgress">AREA: 0%</span>
                     <span id="hudAttempts">VITE: ∞</span>
                 </div>
-                
-                <div class="game-wrapper" id="gameWrapper">
-                    <div class="vignette-overlay"></div>
-                    <canvas id="gameCanvas"></canvas>
-                    
-                    <div id="toastContainer" class="toast-overlay">
-                        <div id="toastTitle" class="toast-title">Titolo</div>
-                        <div id="toastDesc" class="toast-desc">Descrizione</div>
-                        <button id="toastBtn" class="btn-toast primary" onclick="handleToastAction()">Azione</button>
-                        
-                        <ul class="tutorial-list" id="tutorialRules" style="display:none;">
-                            <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l7-7 7 7"/><path d="M12 5v14"/></svg><span>Trascina per svelare l'immagine.</span></li>
-                            <li><svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--cyan)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Allontanati dal bordo per armare il laser.</span></li>
-                            <li><svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--red)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Evita le comete rosse. Il rilascio ti riavvolge.</span></li>
-                        </ul>
+            </div>
+            
+            <div class="game-area" id="gameArea">
+                <!-- Wrapper per gestire il glow senza overflow:hidden -->
+                <div class="game-box-wrapper" id="gameBoxWrapper">
+                    <div class="game-box" id="mainGameBox">
+                        <div class="vignette-overlay"></div>
+                        <canvas id="gameCanvas"></canvas>
                     </div>
+                    <!-- Cursore sovrapposto e libero di sbordare -->
+                    <div id="playerCursor"></div>
                 </div>
+            </div>
+
+            <!-- Overlays -->
+            <div id="toastContainer" class="toast-overlay">
+                <div id="toastTitle" class="toast-title">Titolo</div>
+                <div id="toastDesc" class="toast-desc">Descrizione</div>
+                <button id="toastBtn" class="btn-toast primary" onclick="handleToastAction()">Azione</button>
+                
+                <ul class="tutorial-list" id="tutorialRules" style="display:none;">
+                    <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l7-7 7 7"/><path d="M12 5v14"/></svg><span>Trascina per svelare l'immagine.</span></li>
+                    <li><svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--cyan)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Allontanati dal bordo per armare il laser.</span></li>
+                    <li><svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--red)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Evita le comete rosse. Il rilascio ti riavvolge.</span></li>
+                </ul>
             </div>
         </div>
     </div>
@@ -317,7 +376,8 @@
         // --- ENGINE DI GIOCO ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        const gameBoxUI = document.getElementById('mainGameBox');
+        const gameBoxWrapper = document.getElementById('gameBoxWrapper');
+        const playerCursorDOM = document.getElementById('playerCursor');
 
         let WIDTH = 0; let HEIGHT = 0;
         let grid = []; let spheres = [];
@@ -331,29 +391,36 @@
         let playerSpeed = 4.2; 
         let isRewinding = false; 
         
-        // FISICA RICALIBRATA "SAFE-BOX"
         let isImmune = true; 
-        const IMMUNITY_THRESHOLD = 30; // Distanza per riarmo
-        const SNAP_WALL = 12;          // Snap bordi esterni
-        const SNAP_TRAIL = 6;          // Snap bordi interni
+        const IMMUNITY_THRESHOLD = 30; 
+        const SNAP_WALL = 12;          
+        const SNAP_TRAIL = 6;          
 
         let cropData = { x: 0, y: 0, w: 0, h: 0 };
         let colorPixels = null, bwPixels = null, screenImageData = null;
         let trailPoints = []; 
         let currentToastAction = null;
 
-        // Gestione TOAST Custom
+        // Gestione TOAST Custom (Supporta Banner Vittoria)
         function showToast(title, desc, btnText, type, callback, isTutorial = false) {
+            const tc = document.getElementById('toastContainer');
+            tc.className = 'toast-overlay active';
+            
+            if (type === 'victory') {
+                tc.classList.add('victory-banner');
+                type = 'success';
+            }
+            
             document.getElementById('toastTitle').innerText = title;
             document.getElementById('toastTitle').className = `toast-title ${type}`;
             document.getElementById('toastDesc').innerText = desc;
             document.getElementById('toastDesc').style.display = desc ? 'block' : 'none';
             document.getElementById('toastBtn').innerText = btnText;
             document.getElementById('tutorialRules').style.display = isTutorial ? 'block' : 'none';
-            document.getElementById('toastContainer').classList.add('active');
+            
             currentToastAction = callback;
         }
-        function hideToast() { document.getElementById('toastContainer').classList.remove('active'); }
+        function hideToast() { document.getElementById('toastContainer').className = 'toast-overlay'; }
         function handleToastAction() { if(currentToastAction) currentToastAction(); else hideToast(); }
 
         function checkUrlAndRouting() {
@@ -390,8 +457,8 @@
 
         function setupGameCanvas() {
             setTimeout(() => {
-                const wrapper = document.getElementById('gameWrapper');
-                const rect = wrapper.getBoundingClientRect();
+                const boxWrapper = document.getElementById('mainGameBox');
+                const rect = boxWrapper.getBoundingClientRect();
                 WIDTH = Math.floor(rect.width); HEIGHT = Math.floor(rect.height);
                 canvas.width = WIDTH; canvas.height = HEIGHT;
 
@@ -403,9 +470,9 @@
                 grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
                 for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; } }
                 
-                // Partenza al centro del box visibile
                 player.x = Math.floor(WIDTH / 2); player.y = HEIGHT - 1;
                 currentPos.x = player.x; currentPos.y = player.y;
+                playerCursorDOM.style.display = 'block';
 
                 let tempCanvas = document.createElement('canvas'); tempCanvas.width = 60; tempCanvas.height = Math.floor(60 / canvasRatio);
                 tempCanvas.getContext('2d').drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, tempCanvas.width, tempCanvas.height);
@@ -432,28 +499,29 @@
                 gameInterval = setInterval(updateGame, 1000 / 60);
 
                 isPlaying = true; trailPoints = []; isImmune = true; 
-            }, 300); // Timeout per permettere ricalcolo UI post-fullscreen
+            }, 300); 
         }
 
         function setupFluidControls() {
+            const boxWrapper = document.getElementById('mainGameBox');
             function updateTarget(e) {
-                let rect = canvas.getBoundingClientRect();
+                let rect = boxWrapper.getBoundingClientRect();
                 let clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 let clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 targetPos.x = clientX - rect.left; targetPos.y = clientY - rect.top;
             }
-            canvas.addEventListener('pointerdown', (e) => { 
+            boxWrapper.addEventListener('pointerdown', (e) => { 
                 e.preventDefault(); 
                 if(!isRewinding) { isPointerDown = true; updateTarget(e); } 
             });
-            canvas.addEventListener('pointermove', (e) => { e.preventDefault(); if (isPointerDown) updateTarget(e); });
+            boxWrapper.addEventListener('pointermove', (e) => { e.preventDefault(); if (isPointerDown) updateTarget(e); });
             
             const handlePointerUp = () => {
                 isPointerDown = false; targetPos.x = null; targetPos.y = null;
                 if (isDrawing && !isRewinding) { isRewinding = true; } 
             };
-            canvas.addEventListener('pointerup', handlePointerUp);
-            canvas.addEventListener('pointercancel', handlePointerUp);
+            boxWrapper.addEventListener('pointerup', handlePointerUp);
+            boxWrapper.addEventListener('pointercancel', handlePointerUp);
         }
 
         function getBresenhamPoints(x0, y0, x1, y1) {
@@ -488,7 +556,6 @@
 
             if (target === 1) { 
                 if (isDrawing) { 
-                    // FILTRO ANTI-TREMOLIO
                     if (trailPoints.length < 15) {
                         isDrawing = false; trailPoints = []; player.x = nx; player.y = ny; return true;
                     }
@@ -571,7 +638,6 @@
 
                     if (isImmune) { checkImmunityDeactivation(newX, newY); }
 
-                    // SNAP CHIRURGICO
                     if (!isImmune && isDrawing && trailPoints.length > 15) {
                         let forcedSnap = false;
                         let snapX = Math.floor(newX); let snapY = Math.floor(newY);
@@ -617,15 +683,22 @@
                 }
             }
 
-            // GESTIONE GLOW REATTIVO SUL BOX
+            // GESTIONE GLOW REATTIVO SUL BOX (Senza Clipping)
             let baseGlow = isImmune ? 10 : 25;
             let dynamicGlow = isImmune ? (Math.sin(pulseTime * 0.5) * 5) : (currentSpeed * 4 + Math.sin(pulseTime) * 10);
             let glowTotal = Math.max(10, baseGlow + dynamicGlow);
-            gameBoxUI.style.boxShadow = `0 0 ${glowTotal}px rgba(0, 240, 255, ${isImmune ? 0.2 : 0.4})`;
+            gameBoxWrapper.style.boxShadow = `0 0 ${glowTotal}px rgba(0, 240, 255, ${isImmune ? 0.15 : 0.4})`;
+
+            // AGGIORNAMENTO POSIZIONE CURSORE HTML
+            if (isPlaying) {
+                playerCursorDOM.style.left = currentPos.x + 'px';
+                playerCursorDOM.style.top = currentPos.y + 'px';
+                let pulseScale = 1 + Math.abs(Math.sin(pulseTime)) * 0.3;
+                playerCursorDOM.style.transform = `translate(-50%, -50%) scale(${pulseScale})`;
+            }
 
             if (isPlaying) {
                 for(let s of spheres) {
-                    // Update scia nemiche
                     s.history.push({x: s.x, y: s.y});
                     if (s.history.length > 15) s.history.shift();
 
@@ -681,7 +754,6 @@
                 }
             }
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(tempGrid[y][x] === 2) grid[y][x] = 2; } }
-
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 1; } }
             trailPoints = []; 
 
@@ -720,8 +792,7 @@
             }
             for (let comp of components) { if (!comp.hasSphere) { for (let dIdx of comp.cells) { grid[Math.floor(dIdx / WIDTH)][dIdx % WIDTH] = 1; } } }
             
-            // Flash Neon Effetto Completamento
-            gameBoxUI.style.boxShadow = `0 0 50px rgba(0, 240, 255, 1)`;
+            gameBoxWrapper.style.boxShadow = `0 0 60px rgba(0, 240, 255, 1)`;
             isImmune = true; 
             checkWin();
         }
@@ -730,11 +801,12 @@
             isPlaying = false; isPointerDown = false; isRewinding = false; targetPos.x = null; targetPos.y = null; isDrawing = false;
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 0; } }
             trailPoints = []; isImmune = true; 
-            gameBoxUI.style.boxShadow = `0 0 50px rgba(255, 0, 85, 1)`; // Flash Rosso Danno
+            gameBoxWrapper.style.boxShadow = `0 0 50px rgba(255, 0, 85, 1)`; 
             
             if(challenge.tries !== Infinity) currentAttempts--;
             if(currentAttempts <= 0 && challenge.tries !== Infinity) { 
                 showToast("Game Over", "Segnale perso. Tentativi esauriti.", "Menu Principale", "error", resetToHome);
+                playerCursorDOM.style.display = 'none';
             } else { 
                 showToast("Impatto", "La tua scia è stata interrotta.", "Riprova", "error", () => { hideToast(); initGameData(); isPlaying = true; }); 
             }
@@ -750,7 +822,11 @@
                 clearInterval(gameInterval); isGameWon = true; isPlaying = false;
                 ctx.clearRect(0,0,WIDTH,HEIGHT);
                 ctx.drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, WIDTH, HEIGHT);
-                showToast("Svelata", "Immagine completamente decodificata.", "Menu Principale", "success", resetToHome);
+                playerCursorDOM.style.display = 'none';
+                gameBoxWrapper.style.boxShadow = `0 0 50px rgba(0, 240, 255, 1)`;
+                
+                // Mostra il banner in basso anziché oscurare l'immagine
+                showToast("Svelata", "Immagine completamente decodificata.", "Menu Principale", "victory", resetToHome);
             }
         }
 
@@ -773,7 +849,13 @@
                         if (y > 0 && grid[y-1][x] === 0) isEdge = true; else if (y < HEIGHT-1 && grid[y+1][x] === 0) isEdge = true;
                         else if (x > 0 && grid[y][x-1] === 0) isEdge = true; else if (x < WIDTH-1 && grid[y][x+1] === 0) isEdge = true;
 
-                        if (isEdge) { sData[i]=0; sData[i+1]=240; sData[i+2]=255; sData[i+3]=255; 
+                        if (isEdge) { 
+                            // Per evitare doppi bordi col CSS, coloriamo di ciano solo i bordi interni tracciati
+                            if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) {
+                                sData[i]=colorPixels[i]; sData[i+1]=colorPixels[i+1]; sData[i+2]=colorPixels[i+2]; sData[i+3]=255; 
+                            } else {
+                                sData[i]=0; sData[i+1]=240; sData[i+2]=255; sData[i+3]=255; 
+                            }
                         } else { sData[i]=colorPixels[i]; sData[i+1]=colorPixels[i+1]; sData[i+2]=colorPixels[i+2]; sData[i+3]=255; }
                     } else { sData[i]=bwPixels[i]; sData[i+1]=bwPixels[i+1]; sData[i+2]=bwPixels[i+2]; sData[i+3]=255; }
                 }
@@ -795,7 +877,6 @@
 
             for(let s of spheres) {
                 ctx.save();
-                // Scia cometa rossa
                 ctx.beginPath();
                 for(let i=0; i<s.history.length; i++) {
                     let pt = s.history[i]; let alpha = i / s.history.length;
@@ -803,21 +884,11 @@
                     ctx.fillStyle = `rgba(255, 0, 85, ${alpha * 0.5})`; ctx.fill();
                 }
                 ctx.closePath();
-                // Sfera centrale
                 ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
                 ctx.shadowBlur = 15; ctx.shadowColor = '#ff0055';
                 ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.closePath();
                 ctx.restore();
             }
-
-            ctx.save();
-            let pulseRadius = 5 + Math.abs(Math.sin(pulseTime)) * 6; 
-            ctx.beginPath(); ctx.arc(currentPos.x, currentPos.y, pulseRadius, 0, Math.PI * 2);
-            ctx.shadowBlur = 25; ctx.shadowColor = '#00f0ff'; ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 3; ctx.stroke(); ctx.closePath();
-            
-            ctx.beginPath(); ctx.arc(currentPos.x, currentPos.y, 2, 0, Math.PI * 2);
-            ctx.shadowBlur = 15; ctx.shadowColor = '#00f0ff'; ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.closePath();
-            ctx.restore();
         }
     </script>
 </body>
