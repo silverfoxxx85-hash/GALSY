@@ -35,27 +35,26 @@
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; position: relative; z-index: 1; }
         .screen.active { display: flex; }
         
-        .header { padding: 24px 20px; text-align: center; font-weight: 900; font-size: 22px; letter-spacing: -0.5px; text-transform: uppercase; color: var(--text-color); background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 2;}
+        .header { padding: 30px 20px 20px; text-align: center; color: var(--text-color); background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 2;}
         .header.dark-mode { background: transparent; color: white; border-bottom: none; }
         
         .scroll-content { padding: 30px 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; position: relative; }
         
-        /* BRAND LOGO CON DESIGN TAGLIATO (LASER SLICE) */
+        /* BRAND LOGO CON DESIGN TAGLIATO - PIU' GRANDE E IMPATTANTE */
         .brand-zone {
-            text-align: center; margin-bottom: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .brand-logo {
-            font-size: 42px; font-weight: 900; text-transform: uppercase; letter-spacing: -2px;
+            font-size: 56px; font-weight: 900; text-transform: uppercase; letter-spacing: -3px;
             position: relative; display: inline-block; color: #000; line-height: 1;
         }
         .brand-logo::after {
-            content: ''; position: absolute; left: -10%; top: 50%; width: 120%; height: 3px;
-            background: var(--cyan); transform: rotate(-6deg); box-shadow: 0 0 10px var(--cyan);
+            content: ''; position: absolute; left: -10%; top: 52%; width: 120%; height: 4px;
+            background: var(--cyan); transform: rotate(-6deg); box-shadow: 0 0 15px var(--cyan);
         }
         .brand-subtitle {
-            font-size: 10px; font-weight: 800; color: #888; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px;
+            font-size: 12px; font-weight: 800; color: #888; letter-spacing: 4px; text-transform: uppercase; margin-top: 10px;
         }
-        /* Cambio colore del logo quando c'è lo sfondo immersivo */
         .dark-mode .brand-logo { color: #fff; }
 
         .glass-panel {
@@ -64,7 +63,6 @@
             border: 1px solid rgba(0,0,0,0.05); transition: background 0.3s;
         }
 
-        /* STRUTTURA BOTTONI UPLOAD CON TRACCIATI LINEART BIANCHI */
         .upload-buttons-row { display: flex; gap: 12px; width: 100%; }
         .upload-btn {
             flex: 1; padding: 16px 10px; background: #000; color: white; text-align: center;
@@ -127,6 +125,7 @@
             border: none; cursor: pointer; z-index: 30; display: none;
             font-weight: bold; transition: transform 0.2s;
             display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
         }
         .btn-close-win:active { transform: scale(0.85); }
 
@@ -136,8 +135,10 @@
         .overlay-title.lose { color: var(--red); }
         .btn-retry { background: white; color: black; border: none; padding: 16px 32px; font-weight: 900; font-size: 15px; border-radius: 10px; cursor: pointer; text-transform: uppercase; margin-top: 25px; }
         
-        .tutorial-list { color: #ccc; text-align: left; margin: 25px 0; font-size: 15px; line-height: 1.8; list-style: none; padding: 0; font-weight: 600; }
-        .tutorial-list li { margin-bottom: 15px; }
+        /* TUTORIAL VETTORIALE */
+        .tutorial-list { color: #ccc; text-align: left; margin: 30px 0; font-size: 15px; line-height: 1.6; list-style: none; padding: 0; font-weight: 600; width: 100%; }
+        .tutorial-list li { margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .tutorial-list svg { flex-shrink: 0; }
         .tutorial-list b { color: white; }
     </style>
 </head>
@@ -147,6 +148,7 @@
         
         <div id="appBg" class="app-bg"></div>
 
+        <!-- MITTENTE -->
         <div id="screenRegia" class="screen active">
             <div id="mainHeader" class="header">
                 <div class="brand-zone">
@@ -161,11 +163,11 @@
                     <div id="uploadActionGroup">
                         <div class="upload-buttons-row">
                             <div class="upload-btn" onclick="document.getElementById('cameraInput').click()">
-                                <svg width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                <svg width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                                 Selfie
                             </div>
                             <div class="upload-btn secondary" onclick="document.getElementById('galleryInput').click()">
-                                <svg width="22" height="22" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <svg width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                 Galleria
                             </div>
                         </div>
@@ -219,6 +221,7 @@
             </div>
         </div>
 
+        <!-- DESTINATARIO -->
         <div id="screenGame" class="screen">
             <div class="game-hud" id="gameHud">
                 <button class="hud-btn-exit" onclick="resetToHome()">✕ ESCI</button>
@@ -233,9 +236,18 @@
                 <div id="tutorialOverlay" class="game-overlay" style="z-index: 25;">
                     <div class="overlay-title">Regole</div>
                     <ul class="tutorial-list">
-                        <li>👉 <b>Trascina il dito</b> per muovere il cursore laser e tagliare l'area.</li>
-                        <li>📸 <b>Chiudi i percorsi</b> tornando al bordo per scoprire la foto.</li>
-                        <li>⚠️ <b>Evita le sfere!</b> Se toccano la tua linea, perdi una vita.</li>
+                        <li>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l7-7 7 7"/><path d="M12 5v14"/></svg>
+                            <span><b>Trascina il dito</b> per guidare il laser neon e tagliare l'area scura.</span>
+                        </li>
+                        <li>
+                            <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--cyan)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            <span><b>Chiudi i percorsi</b> tornando al bordo per svelare l'immagine.</span>
+                        </li>
+                        <li>
+                            <svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--red)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            <span><b>Evita le sfere!</b> Se toccano la tua scia neon, perdi una vita.</span>
+                        </li>
                     </ul>
                     <button class="btn-submit" style="width: 100%; margin-top: 10px;" onclick="startGameplay()">Inizia a Giocare</button>
                 </div>
@@ -243,7 +255,7 @@
                 <div id="gameOverlay" class="game-overlay">
                     <div id="overlayTitle" class="overlay-title">Game Over</div>
                     <div id="overlayDesc" style="font-size:15px; color:#aaa; font-weight: 600;">Tentativi esauriti.</div>
-                    <button id="overlayBtn" class="btn-retry" onclick="resetToHome()">Esci</button>
+                    <button id="overlayBtn" class="btn-retry" onclick="resetToHome()">Torna alla Home</button>
                 </div>
             </div>
         </div>
@@ -366,6 +378,7 @@
         let currentDir = null, isGameWon = false, pulseTime = 0, isPlaying = false; 
         const playerSpeedStep = 3; let cropData = { x: 0, y: 0, w: 0, h: 0 };
         let colorPixels = null, bwPixels = null, screenImageData = null;
+        let trailPoints = []; // Tracciamento millimetrico della scia per il Neon
 
         function checkUrlAndRouting() {
             const params = new URLSearchParams(window.location.search);
@@ -389,6 +402,7 @@
             const targets = [0, 60, 70, 80, 85, 90];
             targetPercentage = targets[challenge.diff];
             currentDir = null; isDrawing = false; isGameWon = false; isPlaying = false; 
+            trailPoints = [];
 
             document.getElementById('gameHud').style.display = 'flex';
             document.getElementById('btnCloseWin').style.display = 'none';
@@ -405,7 +419,6 @@
                 setTimeout(() => {
                     const wrapper = document.getElementById('gameWrapper');
                     
-                    // Sincronizzazione millimetrica post-fullscreen
                     WIDTH = wrapper.clientWidth;
                     HEIGHT = wrapper.clientHeight;
                     
@@ -471,7 +484,7 @@
                     gameInterval = setInterval(updateGame, 1000 / 60);
 
                     document.getElementById('tutorialOverlay').style.display = 'none';
-                    isPlaying = true; currentDir = null;
+                    isPlaying = true; currentDir = null; trailPoints = [];
                 }, 300);
             };
 
@@ -529,7 +542,10 @@
                             if(target === 1) {
                                 if(isDrawing) { isDrawing = false; currentDir = null; finalizeConquest(); break; }
                                 player.x = nx; player.y = ny;
-                            } else if(target === 0) { isDrawing = true; player.x = nx; player.y = ny; grid[ny][nx] = 2; } 
+                            } else if(target === 0) { 
+                                isDrawing = true; player.x = nx; player.y = ny; grid[ny][nx] = 2; 
+                                trailPoints.push({x: nx, y: ny}); // Tracciamento Neon
+                            } 
                             else if(target === 2) { handleHit("Hai incrociato la tua stessa scia!"); return; }
                         } else { currentDir = null; break; }
                     }
@@ -552,7 +568,7 @@
                             }
                         }
                     }
-                    if (hitTrail) { handleHit("Una sfera ha colpito la scia!"); return; }
+                    if (hitTrail) { handleHit("Una sfera ha colpito la scia neon!"); return; }
                     if (hitX) { s.x = oldX; s.vx *= -1; }
 
                     let oldY = s.y; s.y += s.vy; let hitY = false;
@@ -570,7 +586,7 @@
                             }
                         }
                     }
-                    if (hitTrail) { handleHit("Una sfera ha colpito la scia!"); return; }
+                    if (hitTrail) { handleHit("Una sfera ha colpito la scia neon!"); return; }
                     if (hitY) { s.y = oldY; s.vy *= -1; }
                 }
             }
@@ -579,6 +595,7 @@
 
         function finalizeConquest() {
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 1; } }
+            trailPoints = []; // Svuota la scia dopo la conquista
             let sphereCenters = spheres.map(s => ({ cx: Math.floor(s.x), cy: Math.floor(s.y) }));
             let fillMap = Array(HEIGHT).fill().map(() => new Uint8Array(WIDTH));
             let queue = [{x: player.x, y: player.y}]; fillMap[player.y][player.x] = 1; let head = 0;
@@ -622,6 +639,7 @@
         function handleHit(msg) {
             isPlaying = false; currentDir = null; isDrawing = false;
             for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 0; } }
+            trailPoints = []; // Distruggi la scia al colpo
             if(challenge.tries !== Infinity) currentAttempts--;
             if(currentAttempts <= 0 && challenge.tries !== Infinity) {
                 showOverlay("Game Over", "Tentativi esauriti.", "lose");
@@ -665,6 +683,8 @@
         function draw() {
             if (isGameWon) return;
             let sData = screenImageData.data;
+            
+            // PRIMO PASSAGGIO: Sfondo e Fotografia
             for (let y = 0; y < HEIGHT; y++) {
                 for (let x = 0; x < WIDTH; x++) {
                     let i = (y * WIDTH + x) * 4; let val = grid[y][x];
@@ -675,23 +695,67 @@
 
                         if (isEdge) { sData[i]=255; sData[i+1]=255; sData[i+2]=255; sData[i+3]=255; } 
                         else { sData[i]=colorPixels[i]; sData[i+1]=colorPixels[i+1]; sData[i+2]=colorPixels[i+2]; sData[i+3]=255; }
-                    } else if (val === 2) { sData[i]=255; sData[i+1]=255; sData[i+2]=255; sData[i+3]=255; } 
-                    else { sData[i]=bwPixels[i]; sData[i+1]=bwPixels[i+1]; sData[i+2]=bwPixels[i+2]; sData[i+3]=255; }
+                    } else if (val === 2) { 
+                        // La scia è dipinta dopo in vettoriale, qui lasciamo lo sfondo scuro sotto di essa
+                        sData[i]=bwPixels[i]; sData[i+1]=bwPixels[i+1]; sData[i+2]=bwPixels[i+2]; sData[i+3]=255; 
+                    } else { 
+                        sData[i]=bwPixels[i]; sData[i+1]=bwPixels[i+1]; sData[i+2]=bwPixels[i+2]; sData[i+3]=255; 
+                    }
                 }
             }
             ctx.putImageData(screenImageData, 0, 0);
 
+            // SECONDO PASSAGGIO: Disegno Vettoriale della Scia Neon
+            ctx.save();
+            if (trailPoints.length > 0) {
+                let neonPulse = Math.abs(Math.sin(pulseTime));
+                
+                // Aura spessa esterna ciano pulsante
+                ctx.beginPath();
+                for(let i=0; i<trailPoints.length; i++) { ctx.rect(trailPoints[i].x - 1, trailPoints[i].y - 1, 3, 3); }
+                ctx.shadowBlur = 15 + neonPulse * 15;
+                ctx.shadowColor = '#00f0ff';
+                ctx.fillStyle = '#00f0ff';
+                ctx.fill();
+                
+                // Anima interna bianca rovente
+                ctx.beginPath();
+                for(let i=0; i<trailPoints.length; i++) { ctx.rect(trailPoints[i].x, trailPoints[i].y, 1, 1); }
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+            }
+            ctx.restore();
+
+            // Disegno Sfere
             for(let s of spheres) {
                 ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
                 ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.closePath();
             }
 
+            // TERZO PASSAGGIO: Cursore Laser Sovralimentato
             ctx.save();
-            let pulseRadius = 4 + Math.abs(Math.sin(pulseTime)) * 5; 
-            ctx.beginPath(); ctx.arc(player.x, player.y, pulseRadius, 0, Math.PI * 2);
-            ctx.shadowBlur = 20; ctx.shadowColor = '#00f0ff'; ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 2.5; 
-            ctx.stroke(); ctx.closePath();
-            ctx.shadowBlur = 0; ctx.fillStyle = '#ffffff'; ctx.fillRect(player.x - 1, player.y - 1, 2, 2);
+            let pulseRadius = 5 + Math.abs(Math.sin(pulseTime)) * 6; 
+            
+            // Anello Laser Ciano
+            ctx.beginPath(); 
+            ctx.arc(player.x, player.y, pulseRadius, 0, Math.PI * 2);
+            ctx.shadowBlur = 25; 
+            ctx.shadowColor = '#00f0ff'; 
+            ctx.strokeStyle = '#00f0ff'; 
+            ctx.lineWidth = 3; 
+            ctx.stroke(); 
+            ctx.closePath();
+
+            // Nucleo Bianco Accecante
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, 2, 0, Math.PI * 2);
+            ctx.shadowBlur = 15; 
+            ctx.shadowColor = '#00f0ff'; 
+            ctx.fillStyle = '#ffffff'; 
+            ctx.fill();
+            ctx.closePath();
+
             ctx.restore();
         }
 
