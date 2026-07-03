@@ -30,16 +30,20 @@
             background: #000; z-index: 999; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; transition: opacity 0.5s ease;
         }
-        .splash-logo {
-            font-size: 64px; font-weight: 900; text-transform: uppercase; letter-spacing: -3px;
-            color: #ffffff; text-shadow: 0 0 20px rgba(0,240,255,0.6); position: relative; 
-            animation: pulseNeon 2s infinite; text-align: center; line-height: 1;
+
+        .brand-logo { font-size: 64px; font-weight: 900; text-transform: uppercase; letter-spacing: -3px; position: relative; display: inline-block; color: #000; line-height: 1; }
+        .brand-logo::after { content: ''; position: absolute; left: -10%; top: 52%; width: 120%; height: 5px; background: var(--cyan); transform: rotate(-6deg); box-shadow: 0 0 15px var(--cyan); }
+        .brand-subtitle { font-size: 12px; font-weight: 800; color: #888; letter-spacing: 5px; text-transform: uppercase; margin-top: 12px; }
+        
+        /* Modifica Esplicita: Testo bianco con bagliore Ciano per Splash e Vittoria */
+        .brand-logo.splash-logo {
+            color: #ffffff !important;
+            text-shadow: 0 0 15px rgba(0,240,255,0.8), 0 0 30px rgba(0,240,255,0.5);
+            animation: pulseNeon 2s infinite; text-align: center; line-height: 1.1;
         }
-        .splash-logo::after {
-            content: ''; position: absolute; left: -10%; top: 52%; width: 120%; height: 4px;
-            background: var(--cyan); transform: rotate(-6deg); box-shadow: 0 0 25px var(--cyan);
-        }
-        @keyframes pulseNeon { 0% { text-shadow: 0 0 10px rgba(0,240,255,0.3); } 50% { text-shadow: 0 0 30px rgba(0,240,255,0.8); } 100% { text-shadow: 0 0 10px rgba(0,240,255,0.3); } }
+        @keyframes pulseNeon { 0% { text-shadow: 0 0 10px rgba(0,240,255,0.4); } 50% { text-shadow: 0 0 30px rgba(0,240,255,0.9); } 100% { text-shadow: 0 0 10px rgba(0,240,255,0.4); } }
+
+        .dark-mode .brand-logo:not(.splash-logo) { color: #fff; text-shadow: 0 0 20px rgba(0,240,255,0.6); }
 
         .app-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -60,10 +64,6 @@
         .scroll-content { padding: 30px 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; position: relative; }
         
         .brand-zone { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .brand-logo { font-size: 64px; font-weight: 900; text-transform: uppercase; letter-spacing: -3px; position: relative; display: inline-block; color: #000; line-height: 1; }
-        .brand-logo::after { content: ''; position: absolute; left: -10%; top: 52%; width: 120%; height: 5px; background: var(--cyan); transform: rotate(-6deg); box-shadow: 0 0 15px var(--cyan); }
-        .brand-subtitle { font-size: 12px; font-weight: 800; color: #888; letter-spacing: 5px; text-transform: uppercase; margin-top: 12px; }
-        .dark-mode .brand-logo { color: #fff; text-shadow: 0 0 20px rgba(0,240,255,0.6); }
 
         .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); transition: background 0.3s; }
 
@@ -126,7 +126,6 @@
             width: 100%; height: 100%; position: relative;
         }
 
-        /* Glow e bordi gestiti da un layer superiore per non subire clip dall'overflow */
         .game-glow-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             border-radius: 20px; border: 2px solid var(--cyan);
@@ -143,7 +142,6 @@
         #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; position: absolute; top:0; left:0; }
         .vignette-overlay { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; z-index: 5; background: radial-gradient(circle at center, transparent 50%, rgba(0, 240, 255, 0.1) 100%); }
 
-        /* Cursore DOM svincolato */
         .player-cursor {
             position: absolute; width: 14px; height: 14px; background: #fff; 
             border: 2px solid var(--cyan); border-radius: 50%; 
@@ -185,8 +183,8 @@
             z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
         }
         .cinematic-text-overlay.active { opacity: 1; }
-        .cinematic-text-overlay .splash-logo { font-size: 42px; line-height: 1.1; }
 
+        /* background-size: cover; forza il riempimento totale dello schermo senza bande nere */
         .final-image-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; 
             background-size: cover; background-repeat: no-repeat;
@@ -318,7 +316,7 @@
             
             <!-- Regia Cinematografica -->
             <div id="victoryOverlay" class="cinematic-text-overlay">
-                <div class="brand-logo splash-logo" style="color:#fff;">FILE<br>DECODIFICATO</div>
+                <div class="brand-logo splash-logo">FILE<br>DECODIFICATO</div>
             </div>
             <div id="finalImageScreen" class="final-image-screen" onclick="advanceVictory()">
                 <div id="secretMessageOverlay" class="secret-overlay">
@@ -330,7 +328,7 @@
         <!-- SCHERMATA CTA FINALE (FUNNEL) -->
         <div id="screenCTA" class="screen">
             <div class="scroll-content" style="justify-content: center; align-items: center; text-align: center; height:100%;">
-                <div class="brand-logo" style="color:white; margin-bottom: 30px; text-shadow: 0 0 20px rgba(0,240,255,0.6);">UNVEIL</div>
+                <div class="brand-logo splash-logo" style="font-size: 48px; margin-bottom: 30px;">UNVEIL</div>
                 <h2 style="color:var(--cyan); font-weight: 900; text-transform: uppercase; font-size: 28px; margin-bottom: 15px;">Codifica il tuo file</h2>
                 <p style="color:#aaa; font-size:16px; font-weight: 600; margin-bottom: 40px; line-height: 1.5; max-width: 280px;">
                     Ora tocca a te.<br>Nascondi una foto, imposta la difficoltà e lancia la tua sfida.
@@ -372,7 +370,7 @@
                 challenge.imgBase64 = e.target.result;
                 const bg = document.getElementById('appBg');
                 bg.style.backgroundImage = `url(${e.target.result})`; bg.style.opacity = '1';
-                document.getElementById('bgOverlay').style.display = 'block'; // Scurisce per leggibilità
+                document.getElementById('bgOverlay').style.display = 'block'; 
                 document.getElementById('mainHeader').classList.add('dark-mode');
                 document.getElementById('uploadActionGroup').style.display = 'none';
                 document.getElementById('uploadStatusUI').style.display = 'block';
@@ -963,6 +961,8 @@
             }
         }
     </script>
+</body>
+</html>
 </body>
 </html>
 
