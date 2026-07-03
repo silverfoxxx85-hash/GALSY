@@ -318,15 +318,62 @@
         let currentAttempts = 0;
         let loadedImage = new Image(); loadedImage.crossOrigin = "Anonymous";
         let finalShareUrl = "";
+        
+        // --- NUOVE VARIABILI PER LA REGIA ---
+        let victoryStep = 0;
+        let currentSecretMessage = "";
 
         window.onload = () => {
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
-                splash.style.opacity = '0';
-                setTimeout(() => { splash.style.display = 'none'; }, 500);
+                if(splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => { splash.style.display = 'none'; }, 500);
+                }
             }, 1200);
             checkUrlAndRouting();
+            injectNewUI(); // Inietta la nuova grafica automaticamente
         };
+
+        // --- FUNZIONE CHE AGGIORNA LA GRAFICA IN AUTOMATICO ---
+        function injectNewUI() {
+            try {
+                // 1. Fix Blur & Overlay Sfondo
+                const appBg = document.getElementById('appBg');
+                if(appBg) {
+                    appBg.style.filter = 'blur(6px)'; // Raggio ridotto
+                    if(!document.getElementById('bg-dark-overlay')) {
+                        const overlay = document.createElement('div');
+                        overlay.id = 'bg-dark-overlay';
+                        overlay.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: -1;';
+                        appBg.parentNode.insertBefore(overlay, appBg.nextSibling);
+                    }
+                }
+
+                // 2. Inserimento Input Messaggio Segreto (Sopra il tasto Genera)
+                const btnSubmit = document.getElementById('btnSubmit');
+                if(btnSubmit && !document.getElementById('secretMessageContainer')) {
+                    const secretDiv = document.createElement('div');
+                    secretDiv.id = 'secretMessageContainer';
+                    secretDiv.style.cssText = 'margin: 15px 0; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; border: 1px solid #00ffff; text-align: left;';
+                    secretDiv.innerHTML = `
+                        <label style="display:block; font-size:12px; font-weight:bold; color:#00ffff; margin-bottom:8px; text-transform:uppercase; letter-spacing: 1px;">Messaggio Rivelazione (Opzionale)</label>
+                        <textarea id="secretMessage" maxlength="140" placeholder="SCRIVI QUI IL TUO MESSAGGIO..." style="width:100%; height:60px; background:rgba(0,0,0,0.5); color:#fff; border:none; border-radius:5px; padding:10px; font-family:sans-serif; text-transform:uppercase; resize:none; box-sizing:border-box;"></textarea>
+                        <div id="charCount" style="text-align:right; font-size:10px; color:#aaa; margin-top:5px;">0/140</div>
+                    `;
+                    btnSubmit.parentNode.insertBefore(secretDiv, btnSubmit);
+
+                    const textarea = document.getElementById('secretMessage');
+                    const charCount = document.getElementById('charCount');
+                    textarea.addEventListener('input', () => { charCount.textContent = `${textarea.value.length}/140`; });
+                }
+
+                // 3. Fix Cursore tagliato
+                const gameBoxWrapper = document.getElementById('gameBoxWrapper');
+                if(gameBoxWrapper) gameBoxWrapper.style.overflow = 'visible';
+
+            } catch (e) { console.error("Errore Iniezione UI:", e); }
+        }
 
         function handleFileSelect(input) {
             const file = input.files[0];
@@ -363,6 +410,13 @@
             const btn = document.getElementById('btnSubmit'); const originalText = btn.innerHTML;
             btn.innerHTML = "Elaborazione..."; btn.disabled = true;
 
+            // Preleviamo il messaggio segreto
+            const secretMsgInput = document.getElementById('secretMessage');
+            let secretParam = "";
+            if(secretMsgInput && secretMsgInput.value.trim() !== "") {
+                secretParam = `&msg=${encodeURIComponent(secretMsgInput.value.trim())}`;
+            }
+
             try {
                 const base64Data = challenge.imgBase64.split(',')[1];
                 const formData = new FormData(); formData.append("image", base64Data);
@@ -372,7 +426,8 @@
                 if(data.success) {
                     const shortImgUrl = data.data.url; 
                     const baseUrl = window.location.href.split('?')[0];
-                    finalShareUrl = `${baseUrl}?d=${challenge.diff}&t=${challenge.tries}&img=${encodeURIComponent(shortImgUrl)}`;
+                    // Il messaggio viene nascosto nell'URL!
+                    finalShareUrl = `${baseUrl}?d=${challenge.diff}&t=${challenge.tries}${secretParam}&img=${encodeURIComponent(shortImgUrl)}`;
                     btn.style.display = 'none'; document.getElementById('shareContainer').style.display = 'block';
                 } else { showToast("Errore", "Riprova", "OK", "error", hideToast); btn.innerHTML = originalText; btn.disabled = false; }
             } catch (error) { showToast("Errore", "Connessione", "OK", "error", hideToast); btn.innerHTML = originalText; btn.disabled = false; }
@@ -431,6 +486,12 @@
                 challenge.diff = parseInt(params.get('d')) || 3;
                 challenge.tries = params.get('t') === 'Infinity' ? Infinity : parseInt(params.get('t'));
                 currentAttempts = challenge.tries;
+                
+                // Leggiamo il messaggio segreto dall'URL se c'è
+                if(params.has('msg')) {
+                    currentSecretMessage = decodeURIComponent(params.get('msg'));
+                } else { currentSecretMessage = ""; }
+
                 loadedImage.onload = function() { initGameData(); };
                 loadedImage.src = decodeURIComponent(params.get('img'));
             } else { document.getElementById('screenRegia').classList.add('active'); }
@@ -444,8 +505,15 @@
             document.getElementById('hudProgress').innerText = `AREA: 0% / ${targetPercentage}%`;
             document.getElementById('hudAttempts').innerText = `VITE: ${challenge.tries === Infinity ? '∞' : currentAttempts}`;
             
-            // Popola il target dinamico nel tutorial
-            document.getElementById('tutTarget').innerHTML = `Reclama almeno il <b>${targetPercentage}%</b> del territorio per sbloccare l'immagine completa.`;
+            // Nuovi testi Tutorial Iniettati Automaticamente
+            const tutRules = document.getElementById('tutorialRules');
+            if(tutRules) {
+                tutRules.innerHTML = `
+                    <p style="margin-bottom:12px; line-height: 1.4; font-size: 14px;"><b>Svela l'Area:</b> Trascina per isolare e decodificare le zone nascoste dell'immagine.</p>
+                    <p style="margin-bottom:12px; line-height: 1.4; font-size: 14px;"><b>Zona Critica:</b> Evita le comete rosse: ogni impatto interromperà il tracciamento.</p>
+                    <p id="tutTarget" style="line-height: 1.4; font-size: 14px;"><b>Obiettivo:</b> Raggiungi il <b style="color:#00ffff;">${targetPercentage}%</b> di decodifica per sbloccare l'intero file.</p>
+                `;
+            }
             
             showToast("", "", "INIZIA A GIOCARE", "success", requestStartGameplay, true);
         }
@@ -473,7 +541,6 @@
                 grid = Array(HEIGHT).fill().map(() => Array(WIDTH).fill(0));
                 for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1; } }
                 
-                // Spawn in ALTO AL CENTRO per schivare il popup Android
                 player.x = Math.floor(WIDTH / 2); player.y = 0;
                 currentPos.x = player.x; currentPos.y = player.y;
 
@@ -792,6 +859,7 @@
             }
         }
 
+        // --- NUOVA LOGICA DI VITTORIA IN 3 STEP ---
         function checkWin() {
             let disc = 0, tot = 0;
             for(let y=0; y < HEIGHT; y++) { for(let x=0; x < WIDTH; x++) { tot++; if(grid[y][x] === 1) disc++; } }
@@ -801,47 +869,103 @@
             if(p >= targetPercentage) {
                 clearInterval(gameInterval); isGameWon = true; isPlaying = false;
                 
-                // Draw full image
+                // Pulisci e disegna l'immagine finale sul canvas
                 ctx.clearRect(0,0,WIDTH,HEIGHT);
                 ctx.drawImage(loadedImage, cropData.x, cropData.y, cropData.w, cropData.h, 0, 0, WIDTH, HEIGHT);
                 gameBoxWrapper.style.boxShadow = `0 0 50px rgba(0, 240, 255, 1)`;
                 
-                // --- REGIA CINEMATOGRAFICA ---
-                const vo = document.getElementById('victoryOverlay');
-                vo.classList.add('active'); // 1. Mostra "FILE DECODIFICATO"
-                
-                setTimeout(() => {
-                    vo.classList.remove('active'); // 2. Fade out testo
-                    
-                    setTimeout(() => {
-                        // 3. Full Screen dell'immagine e rimozione HUD
-                        const finalScreen = document.getElementById('finalImageScreen');
-                        finalScreen.style.backgroundImage = `url(${loadedImage.src})`;
-                        finalScreen.classList.add('active');
-                        
-                        document.querySelector('.game-hud').style.display = 'none';
-                        document.getElementById('gameBoxWrapper').style.display = 'none';
-                        
-                        // 4. Mostra bottone Avanti
-                        setTimeout(() => {
-                            document.getElementById('btnAvanti').style.opacity = '1';
-                            document.getElementById('btnAvanti').style.pointerEvents = 'all';
-                        }, 1000);
-                        
-                    }, 800);
-                }, 2500);
+                // Avvia la nuova regia cinematografica
+                triggerVictorySequence();
             }
         }
 
+        function triggerVictorySequence() {
+            // Nascondi il vecchio HUD
+            const hud = document.querySelector('.game-hud');
+            if(hud) hud.style.display = 'none';
+            document.getElementById('gameBoxWrapper').style.display = 'none';
+
+            // Costruzione Dinamica della Nuova Schermata di Vittoria
+            let victoryScreen = document.getElementById('new-victory-screen');
+            if(!victoryScreen) {
+                victoryScreen = document.createElement('div');
+                victoryScreen.id = 'new-victory-screen';
+                victoryScreen.innerHTML = `
+                    <style>
+                        #new-victory-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: #000; display: none; }
+                        #new-victory-screen.active { display: block; }
+                        #victory-image { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
+                        #victory-overlay-new { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+                        .hidden-overlay { opacity: 0; pointer-events: none; }
+                        .flicker-text { font-family: sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: 4px; color: #ffffff; animation: flicker 0.5s ease-out forwards; text-align: center; }
+                        @keyframes flicker { 0% { opacity:0.1; text-shadow:none; } 20% { opacity:1; text-shadow:0 0 10px #00ffff; } 30% { opacity:0.2; text-shadow:none; } 40% { opacity:1; text-shadow:0 0 15px #00ffff; } 50% { opacity:0.5; text-shadow:none; } 100% { opacity:1; text-shadow:0 0 15px #00ffff, 0 0 30px #00ffff; } }
+                        #display-secret-message { color: #ffffff; font-family: sans-serif; font-weight: bold; font-size: 24px; text-transform: uppercase; text-align: center; letter-spacing: 2px; margin-top: 30px; max-width: 80%; }
+                        #btn-next-victory { position: absolute; bottom: 40px; right: 40px; z-index: 3; background: #00ffff; color: #000; border: none; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
+                    </style>
+                    <img id="victory-image" src="${loadedImage.src}" />
+                    <div id="victory-overlay-new">
+                        <h1 class="flicker-text">FILE DECODIFICATO</h1>
+                        <p id="display-secret-message"></p>
+                    </div>
+                    <button id="btn-next-victory">AVANTI &#10140;</button>
+                `;
+                document.body.appendChild(victoryScreen);
+                document.getElementById('btn-next-victory').addEventListener('click', handleVictoryNext);
+            } else {
+                document.getElementById('victory-image').src = loadedImage.src;
+            }
+
+            victoryScreen.classList.add('active');
+            const overlay = document.getElementById('victory-overlay-new');
+            const msgDisplay = document.getElementById('display-secret-message');
+            const btnNext = document.getElementById('btn-next-victory');
+
+            overlay.classList.remove('hidden-overlay');
+
+            if(currentSecretMessage && currentSecretMessage.trim() !== "") {
+                msgDisplay.textContent = currentSecretMessage;
+                msgDisplay.style.display = 'block';
+                btnNext.innerHTML = "AVANTI &#10140;";
+                victoryStep = 1;
+            } else {
+                msgDisplay.style.display = 'none';
+                btnNext.innerHTML = "CONTINUA &#10140;";
+                victoryStep = 2;
+                // Fade out ritardato del logo
+                setTimeout(() => { overlay.classList.add('hidden-overlay'); }, 1500);
+            }
+        }
+
+        function handleVictoryNext() {
+            const overlay = document.getElementById('victory-overlay-new');
+            const btnNext = document.getElementById('btn-next-victory');
+
+            if(victoryStep === 1) {
+                overlay.classList.add('hidden-overlay');
+                btnNext.innerHTML = "CONTINUA &#10140;";
+                victoryStep = 2;
+            } else if (victoryStep === 2) {
+                // Passa alla schermata finale (CTA di creazione)
+                document.getElementById('new-victory-screen').classList.remove('active');
+                goToCTA(); 
+            }
+        }
+
+        // --- RITORNO ALLA SCHERMATA FINALE ---
         function goToCTA() {
             if (document.fullscreenElement || document.webkitFullscreenElement) {
                 if (document.exitFullscreen) document.exitFullscreen(); 
                 else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
             }
             document.getElementById('screenGame').classList.remove('active');
-            document.getElementById('finalImageScreen').classList.remove('active');
+            
+            const finalImage = document.getElementById('finalImageScreen');
+            if(finalImage) finalImage.classList.remove('active');
+            
             document.querySelector('.app-container').style.background = '#000';
-            document.getElementById('appBg').style.opacity = '0';
+            const appBg = document.getElementById('appBg');
+            if(appBg) appBg.style.opacity = '0';
+            
             document.getElementById('screenCTA').classList.add('active');
         }
 
@@ -852,6 +976,7 @@
             window.location.href = window.location.href.split('?')[0]; 
         }
 
+        // --- SISTEMA DI RENDERING (Intatto) ---
         function draw() {
             if (isGameWon) return;
             let sData = screenImageData.data;
