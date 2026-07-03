@@ -180,7 +180,6 @@
         }
         .cinematic-text-overlay.active { opacity: 1; }
         
-        /* Font size ridotto per evitare che tocchi i bordi */
         .cinematic-text-overlay .splash-logo { font-size: 32px; line-height: 1.2; letter-spacing: -1px; }
 
         .final-image-screen {
@@ -198,14 +197,12 @@
         }
         .secret-overlay.active { opacity: 1; pointer-events: all; }
         
-        /* Messaggio: Uppercase e Extrabold (900) */
         .secret-text { 
             color: white; font-size: 24px; font-weight: 900; 
             text-shadow: 0 0 15px rgba(0,240,255,0.8); line-height: 1.4; 
             font-style: italic; text-transform: uppercase; 
         }
 
-        /* Indicatore Tocca per continuare */
         .tap-indicator {
             position: absolute; bottom: max(40px, env(safe-area-inset-bottom)); 
             left: 50%; transform: translateX(-50%);
@@ -441,7 +438,9 @@
         let currentPos = { x: 0, y: 0 }; 
         let targetPos = { x: null, y: null }; 
         let isPointerDown = false;
-        let playerSpeed = 4.2; 
+        
+        // BILANCIAMENTO: Cursore più lento
+        let playerSpeed = 2.6; 
         let isRewinding = false; 
         
         let isImmune = true; 
@@ -540,8 +539,12 @@
                 }
 
                 screenImageData = new ImageData(WIDTH, HEIGHT); spheres = [];
-                let sSpeed = 1.0 + (challenge.diff * 0.4);
-                for(let i=0; i<challenge.diff; i++) { 
+                
+                // BILANCIAMENTO: Aumento massiccio delle comete in base alla difficoltà
+                let numSpheres = [0, 3, 6, 9, 13, 18][challenge.diff];
+                let sSpeed = 1.4 + (challenge.diff * 0.5);
+                
+                for(let i=0; i<numSpheres; i++) { 
                     spheres.push({ x: WIDTH / 2, y: HEIGHT / 2, vx: (Math.random() > 0.5 ? 1 : -1) * sSpeed, vy: (Math.random() > 0.5 ? 1 : -1) * sSpeed, radius: 6, history: [] }); 
                 }
 
@@ -835,16 +838,34 @@
 
         function handleHit(msg) {
             isPlaying = false; isPointerDown = false; isRewinding = false; targetPos.x = null; targetPos.y = null; isDrawing = false;
-            for(let y=0; y<HEIGHT; y++) { for(let x=0; x<WIDTH; x++) { if(grid[y][x] === 2) grid[y][x] = 0; } }
+            
+            // RESET DEL LIVELLO
+            for(let y=0; y<HEIGHT; y++) { 
+                for(let x=0; x<WIDTH; x++) { 
+                    if (x === 0 || x === WIDTH - 1 || y === 0 || y === HEIGHT - 1) grid[y][x] = 1;
+                    else grid[y][x] = 0; 
+                } 
+            }
+            
+            // RESET GIOCATORE E COMETE
+            player.x = Math.floor(WIDTH / 2); player.y = 0;
+            currentPos.x = player.x; currentPos.y = player.y;
+            spheres.forEach(s => { s.x = WIDTH / 2; s.y = HEIGHT / 2; s.history = []; });
+
             trailPoints = []; isImmune = true; 
             glowOverlay.style.boxShadow = `0 0 50px rgba(255, 0, 85, 1)`; 
+            document.getElementById('hudProgress').innerText = `AREA: 0% / ${targetPercentage}%`;
             
             if(challenge.tries !== Infinity) currentAttempts--;
+            document.getElementById('hudAttempts').innerText = `VITE: ${challenge.tries === Infinity ? '∞' : currentAttempts}`;
+
+            draw(); // Aggiorna graficamente lo schermo azzerato
+
             if(currentAttempts <= 0 && challenge.tries !== Infinity) { 
                 playerCursorDom.style.display = 'none';
                 showToast("GAME OVER", "Segnale perso. Tentativi esauriti.", "MENU PRINCIPALE", "error", resetToHome);
             } else { 
-                showToast("IMPATTO", "La tua scia è stata interrotta.", "RIPROVA", "error", () => { hideToast(); isPlaying = true; }); 
+                showToast("IMPATTO", "Livello resettato. La tua scia è stata interrotta.", "RIPROVA", "error", () => { hideToast(); isPlaying = true; }); 
             }
         }
 
